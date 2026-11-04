@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://husoro.com/sitemap.xml
+
+# Disallow crawling of certain file types
+Disallow: *.css$
+Disallow: *.js$
+
+# Allow important files
+Allow: /logo.svg
+Allow: /intro_video.mp4
+Allow: /favicon.ico
