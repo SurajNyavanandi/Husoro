@@ -22,6 +22,7 @@ import {
   Compass,
   Cpu,
   Calendar,
+  Building2,
 } from 'lucide-react';
 
 const HUSORO_LETTERS = ['H', 'U', 'S', 'O', 'R', 'O'];
@@ -528,7 +529,7 @@ export default function App() {
       {/* 2. Hero Section: Cinematic Staggered Letter Drop & Rover Background */}
       <section
         id="home"
-        className="relative min-h-[85vh] sm:min-h-screen flex items-center justify-center pt-24 sm:pt-28 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        className="relative min-h-[55vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center pt-16 xs:pt-20 sm:pt-28 pb-8 sm:pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden"
       >
         {/* MND-X1 Desert Scanning Rover Background Image - Prominently Visible */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -546,10 +547,10 @@ export default function App() {
         {/* Subtle Canvas Radar Grid Background */}
         <RadarCanvas darkMode={true} />
 
-        <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[60vh]">
+        <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center min-h-[35vh] sm:min-h-[50vh] lg:min-h-[60vh]">
           {/* STAGGERED FALLING LETTER BRANDING: H - U - S - O - R - O */}
-          <div className="relative my-4 sm:my-6 select-none max-w-full">
-            <h1 className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-semibold tracking-tight sm:tracking-[-0.03em] leading-none text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-0.5 sm:gap-1.5 md:gap-2">
+          <div className="relative my-2 sm:my-4 lg:my-6 select-none max-w-full">
+            <h1 className="text-3xl xs:text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-semibold tracking-tight sm:tracking-[-0.03em] leading-none text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-0.5 sm:gap-1.5 md:gap-2">
               {HUSORO_LETTERS.map((letter, index) => (
                 <span
                   key={index}
@@ -566,7 +567,7 @@ export default function App() {
           </div>
 
           {/* Tagline: Robots Designed to Save, Protect, & Serve */}
-          <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-light text-white tracking-tight max-w-2xl mx-auto mt-3 sm:mt-4 leading-relaxed drop-shadow-md px-2">
+          <h2 className="text-xs xs:text-sm sm:text-xl md:text-2xl lg:text-3xl font-light text-white tracking-tight max-w-2xl mx-auto mt-2 sm:mt-4 leading-relaxed drop-shadow-md px-2">
             Robots Designed to{' '}
             <span className="text-[#3b82f6] font-medium">Save</span>,{' '}
             <span className="text-[#ff6c2c] font-medium">Protect</span>, &amp;{' '}
@@ -638,12 +639,17 @@ export default function App() {
                     Organization Details
                   </h3>
                   <p className="text-xs font-normal text-[#515154] dark:text-slate-400">
-                    Defense robotics firm headquartered in Hyderabad.
+                    Defense robotics firm incubated at iTIC Foundation, IIT Hyderabad.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
                   {[
+                    {
+                      icon: Building2,
+                      label: 'Incubation Support',
+                      value: 'Incubated at iTIC Foundation, IIT Hyderabad',
+                    },
                     {
                       icon: Calendar,
                       label: 'Founding Year',
@@ -662,7 +668,7 @@ export default function App() {
                     {
                       icon: MapPin,
                       label: 'Facility Location',
-                      value: 'Jubilee Hills, Hyderabad, India',
+                      value: 'Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284',
                     },
                   ].map((info, i) => {
                     const Icon = info.icon;
@@ -936,10 +942,10 @@ export default function App() {
                     </div>
                     <div>
                       <div className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                        Address
+                        Address (Incubated At)
                       </div>
                       <address className="not-italic text-sm font-medium text-[#1d1d1f] dark:text-slate-200 mt-0.5 leading-relaxed">
-                        Plot no. 24 &amp; 25, Road no. 9, Kakatiya Hills, Jubilee Hills, Hyderabad, India 500081
+                        Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
                       </address>
                     </div>
                   </div>
@@ -1040,21 +1046,60 @@ export default function App() {
         </div>
       </section>
 
-      {/* 7. Location Section: Interactive Map Embed */}
-      <section id="location" className="relative py-12 px-4 sm:px-6 lg:px-8 bg-slate-100/60 dark:bg-[#06080d]">
+      {/* 7. Location Section: Ultra-Minimalist 40/60 Split Card */}
+      <section id="location" className="relative py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-slate-100/50 dark:bg-[#06080d] border-t border-slate-200/60 dark:border-white/5">
         <div className="max-w-6xl mx-auto">
-          <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-lg">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d266.72235359918153!2d78.39691160365606!3d17.44263243705808!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb90cdcee40001%3A0x8679dc09ba021d68!2sProsync%20Consulting!5e0!3m2!1sen!2sin!4v1762513935672!5m2!1sen!2sin"
-              width="100%"
-              style={{ border: 0 }}
-              allowFullScreen={false}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="HUSORO Technologies office location in Jubilee Hills, Hyderabad"
-              aria-label="Interactive map showing HUSORO Technologies office location"
-              className="w-full h-65 sm:h-80 md:h-90 grayscale contrast-125 dark:opacity-85"
-            ></iframe>
+          <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-sm bg-white dark:bg-slate-900/60 overflow-hidden p-2 sm:p-3">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+              {/* 40% Column (lg:col-span-5): Ultra-Minimalist Address & Directions Card */}
+              <div className="lg:col-span-5 p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 flex flex-col justify-between gap-5">
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-[#0051bb] dark:text-[#ff6c2c] px-2.5 py-1 rounded-md bg-blue-50 dark:bg-[#ff6c2c]/10 border border-blue-100 dark:border-[#ff6c2c]/20">
+                      Campus Location
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h3 className="text-base sm:text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+                      IIT HYDERABAD
+                    </h3>
+                    <p className="text-xs sm:text-sm font-normal text-[#515154] dark:text-slate-300 leading-relaxed">
+                      Technology Innovation Park, Kandi, Sangareddy, Telangana, India - 502284
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <a
+                    href="https://www.google.com/maps/dir//Indian+Institute+of+Technology,+Hyderabad,+Kandi,+Telangana+502284"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-white bg-linear-to-r from-[#0051bb] to-[#0458ec] dark:from-[#ff6c2c] dark:to-[#ff8042] shadow-xs hover:opacity-95 transition-all cursor-pointer"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <span>Get Directions</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                  </a>
+                </div>
+              </div>
+
+              {/* 60% Column (lg:col-span-7): Embedded Map */}
+              <div className="lg:col-span-7 rounded-2xl overflow-hidden border border-slate-200/60 dark:border-white/5 min-h-[200px] sm:min-h-[240px]">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.746083111458!2d78.12281607493596!3d17.591350883259838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcbe918233b3e69%3A0x28975bb42111eb9f!2sIndian%20Institute%20of%20Technology%2C%20Hyderabad!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={false}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="HUSORO Technologies location at Technology Innovation Park, IIT Hyderabad"
+                  aria-label="Interactive map showing HUSORO Technologies location at IIT Hyderabad"
+                  className="w-full h-full min-h-[220px] sm:min-h-[260px] grayscale contrast-115 dark:opacity-85"
+                ></iframe>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1072,7 +1117,7 @@ export default function App() {
             </span>
             <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
             <span className="hidden sm:inline text-[#515154] dark:text-slate-400 font-normal">
-              Robots Designed to Save, Protect, &amp; Serve
+              Incubated at iTIC Foundation, IIT Hyderabad
             </span>
           </div>
 
