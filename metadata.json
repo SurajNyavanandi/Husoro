@@ -1,0 +1,8 @@
+{
+  "name": "HUSORO Technologies",
+  "description": "HUSORO Technologies develops M.I.R.A.G.E., an advanced military-grade UGV for landmine detection, subsurface radar, and sensor fusion. Incubated at IIT Hyderabad.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

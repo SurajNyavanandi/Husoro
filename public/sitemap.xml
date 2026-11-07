@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
     <url>
         <loc>https://husoro.com/</loc>
-        <lastmod>2024-11-08</lastmod>
+        <lastmod>2026-11-07</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>https://husoro.com/#about</loc>
-        <lastmod>2024-11-08</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://husoro.com/#product</loc>
-        <lastmod>2024-11-08</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>https://husoro.com/#contact</loc>
-        <lastmod>2024-11-08</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <image:image>
+            <image:loc>https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg</image:loc>
+            <image:title>HUSORO Technologies Official Emblem &amp; Brand Logo</image:title>
+            <image:caption>HUSORO Technologies defense robotics brand emblem, incubated at iTIC Foundation IIT Hyderabad.</image:caption>
+        </image:image>
+        <image:image>
+            <image:loc>https://res.cloudinary.com/dfr0zghtc/image/upload/v1793864428/MND-X1_Desert_Scanning_Rover_pl9j8m.jpg</image:loc>
+            <image:title>MND-X1 Autonomous Desert Landmine Scanning Rover</image:title>
+            <image:caption>HUSORO Autonomous Unmanned Ground Vehicle (UGV) conducting subsurface minefield scanning and detection.</image:caption>
+        </image:image>
+        <video:video>
+            <video:thumbnail_loc>https://res.cloudinary.com/dfr0zghtc/image/upload/v1793864428/MND-X1_Desert_Scanning_Rover_pl9j8m.jpg</video:thumbnail_loc>
+            <video:title>M.I.R.A.G.E. UGV Autonomous Landmine Detection Demonstration</video:title>
+            <video:description>M.I.R.A.G.E. (Minefield Intelligent Radar and Autonomous Ground Explorer) military-grade unmanned ground vehicle demonstration for landmine detection and subsurface sensor fusion.</video:description>
+            <video:content_loc>https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4</video:content_loc>
+            <video:player_loc>https://husoro.com/#product</video:player_loc>
+            <video:family_friendly>yes</video:family_friendly>
+            <video:live>no</video:live>
+        </video:video>
     </url>
 </urlset>

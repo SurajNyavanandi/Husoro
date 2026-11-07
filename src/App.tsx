@@ -6,8 +6,6 @@ import {
   Layers,
   ArrowRight,
   ExternalLink,
-  Sun,
-  Moon,
   MapPin,
   Mail,
   Send,
@@ -26,6 +24,32 @@ import {
 } from 'lucide-react';
 
 const HUSORO_LETTERS = ['H', 'U', 'S', 'O', 'R', 'O'];
+
+const BRAND_LOGO = 'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
+
+// WhatsApp number for inquiry redirection (can be updated with official number)
+const WHATSAPP_NUMBER = '919876543210';
+
+function LinkedInIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9h2.77v8.37H6.46v-8.37M7.84 6.88a1.61 1.61 0 1 0 0 3.22 1.61 1.61 0 0 0 0-3.22Z" />
+    </svg>
+  );
+}
+
+const NAV_LINKS = [
+  { id: 'home', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'product', label: 'Product' },
+  { id: 'technology', label: 'Technology' },
+  { id: 'contact', label: 'Contact' },
+];
 
 // High-precision canvas radar for background defense texture
 function RadarCanvas({ darkMode }: { darkMode: boolean }) {
@@ -173,8 +197,9 @@ export default function App() {
     type: null,
     text: '',
   });
+  const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitBtnText, setSubmitBtnText] = useState('Submit');
+  const [submitBtnText, setSubmitBtnText] = useState('Submit & Send to WhatsApp');
 
   // Sync dark mode class on document & localStorage
   useEffect(() => {
@@ -235,10 +260,11 @@ export default function App() {
     setIsMuted(v.muted);
   };
 
-  // Contact Form Submission with graceful fallback
+  // Contact Form Submission with WhatsApp redirection
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus({ type: null, text: '' });
+    setWhatsappRedirectUrl(null);
 
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
       setFormStatus({ type: 'error', text: 'Please complete all required fields.' });
@@ -252,60 +278,42 @@ export default function App() {
     }
 
     setSubmitting(true);
-    setSubmitBtnText('Transmitting...');
+    setSubmitBtnText('Redirecting to WhatsApp...');
 
+    // Format all inquiry fields for WhatsApp
+    const whatsappText =
+      `*New Inquiry - HUSORO Technologies*\n\n` +
+      `*Name:* ${formData.name}\n` +
+      `*Email:* ${formData.email}\n` +
+      `*Phone:* ${formData.phone.trim() ? formData.phone : 'N/A'}\n` +
+      `*Subject:* ${formData.subject}\n\n` +
+      `*Message:*\n${formData.message}`;
+
+    const targetUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
+    setWhatsappRedirectUrl(targetUrl);
+
+    // Optional background log to contact.php
     try {
-      let isSuccess = false;
-      let responseMsg = 'Message sent successfully! Our defense engineering team will get back to you soon.';
-
-      try {
-        const res = await fetch('/contact.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-
-        if (res.ok) {
-          const contentType = res.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const data = await res.json();
-            if (data.success) {
-              isSuccess = true;
-              if (data.message) responseMsg = data.message;
-            } else {
-              setFormStatus({ type: 'error', text: data.message || 'Error transmitting message.' });
-              setSubmitBtnText('Submit');
-              setSubmitting(false);
-              return;
-            }
-          } else {
-            isSuccess = true;
-          }
-        } else {
-          isSuccess = true;
-        }
-      } catch {
-        isSuccess = true;
-      }
-
-      if (isSuccess) {
-        setFormStatus({ type: 'success', text: responseMsg });
-        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-        setSubmitBtnText('Sent!');
-        setTimeout(() => {
-          setSubmitBtnText('Submit');
-          setSubmitting(false);
-        }, 3000);
-      }
-    } catch (err) {
-      console.error(err);
-      setFormStatus({
-        type: 'error',
-        text: 'Failed to dispatch message. Please retry or contact us directly at info@husoro.com.',
-      });
-      setSubmitBtnText('Submit');
-      setSubmitting(false);
+      fetch('/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      }).catch(() => {});
+    } catch {
+      // Ignored
     }
+
+    setFormStatus({
+      type: 'success',
+      text: 'Redirecting to WhatsApp with your inquiry details pre-filled...',
+    });
+
+    // Directly redirect to WhatsApp
+    setTimeout(() => {
+      window.location.href = targetUrl;
+      setSubmitBtnText('Submitted to WhatsApp');
+      setSubmitting(false);
+    }, 350);
   };
 
   const copyEmailToClipboard = () => {
@@ -352,53 +360,88 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#07090e] text-slate-900 dark:text-slate-100 selection:bg-[#ff6c2c]/30 selection:text-white transition-colors duration-300 relative overflow-x-hidden font-sans">
-      {/* 1. Transparent Floating Header & Navigation (Always Dark on Mobile) */}
-      <header
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 md:py-4 ${
-          isScrolled
-            ? 'backdrop-blur-xl max-md:bg-[#07090e]/95 max-md:border-b max-md:border-white/10 md:bg-white/75 md:dark:bg-[#07090e]/80 md:border-b md:border-slate-200/80 md:dark:border-white/10 shadow-sm shadow-slate-900/5'
-            : 'max-md:bg-[#07090e]/90 max-md:backdrop-blur-md max-md:border-b max-md:border-white/10 bg-transparent border-b border-transparent'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
-          {/* Zone 1: Brand Wordmark & Emblem */}
-          <a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollToSection('home');
-            }}
-            className="group flex items-center gap-2.5 sm:gap-3 whitespace-nowrap shrink-0 focus:outline-none"
-            aria-label="HUSORO Technologies Home"
-          >
-            <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-linear-to-br from-[#0051bb] to-[#0458ec] p-1.5 shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform duration-200">
-              <img src="/logo.svg" alt="HUSORO" className="w-full h-full object-contain filter brightness-0 invert" />
-            </div>
-            <div className="flex flex-col">
-              <span className={`font-medium tracking-tight text-base sm:text-lg transition-colors max-md:text-white ${
-                isScrolled ? 'md:text-[#1d1d1f] md:dark:text-white' : 'text-white'
-              }`}>
-                HUSORO
-              </span>
-              <span className={`text-[9px] tracking-widest uppercase font-medium max-md:text-slate-400 ${
-                isScrolled ? 'md:text-[#86868b] md:dark:text-slate-500' : 'text-slate-300'
-              }`}>
-                Technologies
-              </span>
-            </div>
-          </a>
+      {/* 1. Floating Frosted-Glass Header Pill (21st.dev / Tailwind UI Pattern) */}
+      <div className="fixed top-0 inset-x-0 z-50 px-3 sm:px-6 pt-3 sm:pt-4 pointer-events-none">
+        <header
+          className={`max-w-6xl mx-auto pointer-events-auto rounded-2xl transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 border backdrop-blur-md shadow-2xl shadow-black/40 ${
+            isScrolled
+              ? 'bg-[#090d16]/90 border-white/15 shadow-black/60'
+              : 'bg-slate-900/80 border-white/10'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-4">
+            {/* Zone 1: Brand Wordmark & Geometric Emblem */}
+            <a
+              href="#home"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection('home');
+              }}
+              className="group flex items-center gap-2.5 sm:gap-3 whitespace-nowrap shrink-0 focus:outline-none"
+              aria-label="HUSORO Technologies Home"
+            >
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg overflow-hidden bg-black border border-white/20 shadow-md group-hover:scale-105 transition-transform duration-200 shrink-0">
+                <img
+                  src={BRAND_LOGO}
+                  alt="HUSORO Technologies Defense Robotics Logo Emblem"
+                  width={36}
+                  height={36}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold tracking-tight text-base sm:text-lg font-ubuntu text-white">
+                  HUSORO
+                </span>
+                <span className="text-[9px] tracking-widest uppercase font-semibold font-ubuntu text-slate-400">
+                  Technologies
+                </span>
+              </div>
+            </a>
 
-          {/* Zone 2: 4-5 Clean Nav Links with modern hover effects */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            {[
-              { id: 'home', label: 'Home' },
-              { id: 'about', label: 'About' },
-              { id: 'product', label: 'Product' },
-              { id: 'technology', label: 'Technology' },
-              { id: 'contact', label: 'Contact' },
-            ].map((item) => {
-              const isActive = activeSection === item.id;
-              return (
+            {/* Zone 2: Clean Nav Links with Active Indicator Pill */}
+            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 p-1 rounded-xl bg-black/25 border border-white/5">
+              {NAV_LINKS.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      scrollToSection(item.id);
+                    }}
+                    className={`relative px-3.5 py-1.5 rounded-lg text-xs lg:text-sm font-medium tracking-normal transition-all whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? 'bg-white/15 text-white font-semibold shadow-xs border border-white/15'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+
+            {/* Zone 3: Mobile Toggle */}
+            <div className="flex md:hidden items-center shrink-0">
+              {/* Mobile Menu Hamburger with 44px touch target */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 cursor-pointer"
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Dropdown Menu with touch-friendly targets */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-3 pt-3 border-t border-white/10 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+              {NAV_LINKS.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
@@ -406,151 +449,72 @@ export default function App() {
                     e.preventDefault();
                     scrollToSection(item.id);
                   }}
-                  className={`relative px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium tracking-normal transition-all whitespace-nowrap shrink-0 ${
-                    isActive
-                      ? 'text-[#ff6c2c]'
-                      : isScrolled
-                      ? 'text-[#515154] dark:text-slate-300 hover:text-[#1d1d1f] dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/5'
-                      : 'text-white/85 hover:text-white hover:bg-white/10'
+                  className={`block px-4 py-3 min-h-[44px] flex items-center rounded-xl text-sm font-medium transition-colors ${
+                    activeSection === item.id
+                      ? 'bg-white/15 text-white font-semibold border border-white/15'
+                      : 'text-slate-300 hover:text-white hover:bg-white/5 active:bg-white/10'
                   }`}
                 >
                   {item.label}
-                  {isActive && (
-                    <span className="absolute bottom-0 inset-x-3.5 h-0.5 bg-linear-to-r from-[#0051bb] to-[#ff6c2c] rounded-full" />
-                  )}
                 </a>
-              );
-            })}
-          </nav>
-
-          {/* Zone 3: 1 Primary Action + Theme Toggle + Updates */}
-          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
-            {/* Updates Link */}
-            <a
-              href="https://www.linkedin.com/company/husoro-technologies/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`hidden lg:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
-                isScrolled
-                  ? 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
-                  : 'text-white/80 hover:text-white hover:bg-white/10'
-              }`}
-              aria-label="HUSORO Technologies LinkedIn Updates"
-            >
-              <span>Updates</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
-            </a>
-
-            {/* Dark/Light Mode Switcher */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-xl transition-all focus:outline-none max-md:text-white max-md:hover:bg-white/10 ${
-                isScrolled
-                  ? 'md:text-slate-600 md:dark:text-slate-300 md:hover:bg-slate-100 md:dark:hover:bg-white/10 md:hover:text-slate-900 md:dark:hover:text-white'
-                  : 'text-white/90 hover:bg-white/10 hover:text-white'
-              }`}
-              aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
-            >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-200 md:text-slate-600 md:dark:text-slate-300" />}
-            </button>
-
-            {/* Primary Action Button */}
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wide text-white bg-linear-to-r from-[#0051bb] to-[#0458ec] hover:from-[#004199] hover:to-[#0349c7] rounded-xl shadow-sm shadow-blue-600/30 hover:shadow-md hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap shrink-0"
-            >
-              <span>Get in Touch</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-
-            {/* Mobile Menu Hamburger (Consistently dark mode aesthetic) */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-white hover:bg-white/10 transition-colors focus:outline-none"
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Dropdown Menu (Consistently dark mode aesthetic in both light & dark mode) */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-3 p-4 rounded-2xl bg-[#0b0e17]/95 backdrop-blur-2xl border border-white/15 shadow-2xl space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-            {[
-              { id: 'home', label: 'Home' },
-              { id: 'about', label: 'About' },
-              { id: 'product', label: 'Product' },
-              { id: 'technology', label: 'Technology' },
-              { id: 'contact', label: 'Contact' },
-            ].map((item) => (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToSection(item.id);
-                }}
-                className={`block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  activeSection === item.id
-                    ? 'bg-white/10 text-[#ff6c2c] font-semibold border border-white/10'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {item.label}
-              </a>
-            ))}
-
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-4">
-              <a
-                href="https://www.linkedin.com/company/husoro-technologies/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"
-              >
-                <span>Updates</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  scrollToSection('contact');
-                }}
-                className="px-4 py-2 text-xs font-semibold text-white bg-linear-to-r from-[#0051bb] to-[#0458ec] rounded-lg shadow-sm"
-              >
-                Get in Touch
-              </button>
+              ))}
             </div>
-          </div>
-        )}
-      </header>
+          )}
+        </header>
+      </div>
 
-      {/* 2. Hero Section: Cinematic Staggered Letter Drop & Rover Background */}
+      {/* 2. Hero Section: Cinematic Flexible Sentence Rover Background */}
       <section
         id="home"
-        className="relative min-h-[55vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center pt-16 xs:pt-20 sm:pt-28 pb-8 sm:pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        className="relative min-h-[58vh] sm:min-h-[72vh] lg:min-h-[85vh] flex items-center justify-center pt-20 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-3.5 sm:px-6 lg:px-8 overflow-hidden"
       >
-        {/* MND-X1 Desert Scanning Rover Background Image - Prominently Visible */}
+        {/* MND-X1 Desert Scanning Rover Background Image with Atmospheric Lighting */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src="https://res.cloudinary.com/dfr0zghtc/image/upload/v1793864428/MND-X1_Desert_Scanning_Rover_pl9j8m.jpg"
-            alt="MND-X1 Desert Scanning Rover Background"
-            className="w-full h-full object-cover object-center filter brightness-[0.72] contrast-110 scale-100"
+            alt="MND-X1 Desert Scanning Autonomous Landmine Detection Rover by HUSORO Technologies"
+            width={1920}
+            height={1080}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover object-center filter brightness-[0.72] contrast-115 scale-100"
             referrerPolicy="no-referrer"
           />
-          {/* Subtle gradient vignette to blend top nav and bottom section smoothly while keeping the rover vivid */}
-          <div className="absolute inset-0 bg-linear-to-b from-black/75 via-black/25 to-slate-900/95 dark:to-[#07090e]" />
+
+          {/* Tactical Blue Ambient Light Field (Left) */}
+          <div
+            className="absolute -top-24 -left-24 w-[280px] sm:w-[480px] md:w-[580px] h-[280px] sm:h-[480px] md:h-[580px] bg-gradient-to-br from-[#0051bb]/45 via-[#0458ec]/30 to-transparent rounded-full blur-[90px] sm:blur-[110px] pointer-events-none mix-blend-screen animate-pulse-slow-blue"
+            aria-hidden="true"
+          />
+
+          {/* Defense Radar Orange Glow Flare (Right) */}
+          <div
+            className="absolute top-1/4 -right-20 w-[260px] sm:w-[440px] md:w-[540px] h-[260px] sm:h-[440px] md:h-[540px] bg-gradient-to-bl from-[#ff6c2c]/40 via-[#ff8042]/25 to-transparent rounded-full blur-[90px] sm:blur-[110px] pointer-events-none mix-blend-screen animate-pulse-slow-orange"
+            aria-hidden="true"
+          />
+
+          {/* Optical Scanning Light Beam (Vertical Radar Sweep) */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+            <div className="w-full h-20 sm:h-24 bg-gradient-to-b from-transparent via-[#0458ec]/20 to-[#ff6c2c]/15 animate-scanline-sweep blur-sm" />
+          </div>
+
+          {/* Angled High-Tech Shimmer Light Beam */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+            <div className="w-1/3 h-[200%] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-beam-sweep blur-md" />
+          </div>
+
+          {/* Smooth Vignette blending top nav and bottom section (#07090e) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/30 to-[#07090e]" />
           <div className="absolute inset-0 bg-black/20" />
         </div>
 
         {/* Subtle Canvas Radar Grid Background */}
         <RadarCanvas darkMode={true} />
 
-        <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center min-h-[35vh] sm:min-h-[50vh] lg:min-h-[60vh]">
-          {/* STAGGERED FALLING LETTER BRANDING: H - U - S - O - R - O */}
-          <div className="relative my-2 sm:my-4 lg:my-6 select-none max-w-full">
-            <h1 className="text-3xl xs:text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-semibold tracking-tight sm:tracking-[-0.03em] leading-none text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-0.5 sm:gap-1.5 md:gap-2">
+        <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center">
+          <h1 className="font-ubuntu text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-normal sm:tracking-tight leading-snug sm:leading-tight text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3.5 gap-y-1.5 sm:gap-y-2 uppercase text-center max-w-4xl mx-auto px-2 sm:px-4">
+            <span className="inline-flex items-center gap-0.5 sm:gap-1 text-white">
               {HUSORO_LETTERS.map((letter, index) => (
                 <span
                   key={index}
@@ -563,51 +527,51 @@ export default function App() {
                   {letter}
                 </span>
               ))}
-            </h1>
-          </div>
-
-          {/* Tagline: Robots Designed to Save, Protect, & Serve */}
-          <h2 className="text-xs xs:text-sm sm:text-xl md:text-2xl lg:text-3xl font-light text-white tracking-tight max-w-2xl mx-auto mt-2 sm:mt-4 leading-relaxed drop-shadow-md px-2">
-            Robots Designed to{' '}
-            <span className="text-[#3b82f6] font-medium">Save</span>,{' '}
-            <span className="text-[#ff6c2c] font-medium">Protect</span>, &amp;{' '}
-            <span className="text-white font-medium">Serve</span>
-          </h2>
+            </span>
+            <span className="text-white">ROBOTS DESIGNED TO SAVE, PROTECT, &amp; SERVE</span>
+          </h1>
         </div>
       </section>
 
-      {/* 3. About Us Section: Alternating Zig-Zag (Left: Narrative / Right: Facility Card) */}
+      {/* 3. About Us Section: Alternating Zig-Zag (Left: Narrative / Right: Modern Split Spotlight Card) */}
       <section
         id="about"
-        className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-slate-200/80 dark:border-white/5 bg-white/60 dark:bg-[#090c14]/50 backdrop-blur-sm"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-b border-slate-800/80 bg-[#0d121f] text-slate-100 overflow-hidden"
         aria-labelledby="about-heading"
       >
-        <div className="mx-auto max-w-6xl">
+        {/* Subtle background ambient radial glow */}
+        <div
+          className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-blue-600/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="relative mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
             {/* Left Column: Authentic Mission Story */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="space-y-3">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#0051bb] dark:text-[#0458ec]">
-                  Who We Are
-                </span>
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
+              <div className="space-y-2.5 sm:space-y-3">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
+                  <span>Who We Are</span>
+                </div>
                 <h2
                   id="about-heading"
-                  className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.15]"
+                  className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
                 >
-                  About <span className="font-medium text-[#0051bb] dark:text-[#0458ec]">HUSORO Technologies</span>
+                  About <span className="font-medium text-[#3b82f6]">HUSORO Technologies</span>
                 </h2>
               </div>
 
-              <div className="space-y-4 text-base font-normal leading-relaxed text-[#515154] dark:text-slate-300">
+              <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
                 <p>
-                  Established in 2024, <strong className="font-medium text-[#1d1d1f] dark:text-white">HUSORO Technologies</strong> is
+                  Established in 2024, <strong className="font-medium text-white">HUSORO Technologies</strong> is
                   a deep-tech company dedicated to advancing the field of unmanned robotics. Our mission is to protect human lives and
                   transform critical operations through intelligent, reliable, and purpose-driven robotic systems.
                 </p>
 
                 <p>
                   Built on a strong foundation of in-house research and development, HUSORO combines expertise in{' '}
-                  <strong className="font-medium text-[#1d1d1f] dark:text-white">AI, autonomy, and advanced sensing</strong> to deliver
+                  <strong className="font-medium text-white">AI, autonomy, and advanced sensing</strong> to deliver
                   technologies that are both robust and future-ready.
                 </p>
 
@@ -617,33 +581,33 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-1 sm:pt-2">
                 <button
                   onClick={() => scrollToSection('product')}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-[#0051bb] dark:text-[#ff6c2c] hover:underline"
+                  className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
                 >
                   <span>Discover our flagship UGV</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
 
-            {/* Right Column: Facility & Organization Card */}
+            {/* Right Column: Modern Split Spotlight Facility Card (21st.dev Pattern) */}
             <div className="lg:col-span-5">
               <div
                 onMouseMove={handleMouseMove}
-                className="card-spotlight p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-900/5 dark:shadow-black/60"
+                className="card-spotlight relative p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-[#111726]/90 border border-slate-800/80 shadow-2xl shadow-black/60 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/40 before:to-transparent hover:border-slate-700 transition-colors"
               >
-                <div className="space-y-1 mb-6">
-                  <h3 className="text-lg sm:text-xl font-medium tracking-tight text-[#1d1d1f] dark:text-white">
+                <div className="space-y-1 mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white">
                     Organization Details
                   </h3>
-                  <p className="text-xs font-normal text-[#515154] dark:text-slate-400">
+                  <p className="text-xs font-normal text-slate-400">
                     Defense robotics firm incubated at iTIC Foundation, IIT Hyderabad.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
                   {[
                     {
                       icon: Building2,
@@ -675,16 +639,16 @@ export default function App() {
                     return (
                       <div
                         key={i}
-                        className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 flex items-start gap-3.5"
+                        className="group p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#090d16]/85 border border-slate-800/80 hover:border-blue-500/30 hover:bg-[#0d1322] transition-all flex items-start gap-3 sm:gap-3.5"
                       >
-                        <div className="p-2 rounded-xl bg-white dark:bg-white/5 text-[#0051bb] dark:text-[#ff6c2c] shrink-0 shadow-xs">
+                        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#3b82f6] group-hover:scale-105 group-hover:text-blue-400 transition-all shrink-0 shadow-xs">
                           <Icon className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
                             {info.label}
                           </div>
-                          <div className="text-sm font-medium text-[#1d1d1f] dark:text-slate-200 mt-0.5">
+                          <div className="text-xs sm:text-sm font-medium text-slate-200 mt-0.5 leading-snug break-words">
                             {info.value}
                           </div>
                         </div>
@@ -698,22 +662,34 @@ export default function App() {
         </div>
       </section>
 
-      {/* 4. Product Section: Alternating Zig-Zag (Left: High-Definition Video / Right: Narrative) */}
+      {/* 4. Product Section: Interactive Video Showcase Card & Narrative */}
       <section
         id="product"
-        className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900 dark:bg-[#05070c] text-white border-t border-slate-800 overflow-hidden"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-[#07090e] text-white border-b border-slate-800/80 overflow-hidden"
         aria-labelledby="product-heading"
       >
         <div
-          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-175 h-125 bg-[#ff6c2c]/10 rounded-full blur-[140px] pointer-events-none"
+          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-120 sm:w-175 h-90 sm:h-125 bg-[#ff6c2c]/10 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none"
           aria-hidden="true"
         />
 
         <div className="relative max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
-            {/* Left Column: Video Showcase in Device Frame */}
+            {/* Left Column: Interactive Video Showcase Card (21st.dev Pattern) */}
             <div className="lg:col-span-6 order-2 lg:order-1">
-              <div className="relative rounded-2xl overflow-hidden bg-black/90 border border-white/20 shadow-[0_0_60px_rgba(255,108,44,0.18)] aspect-video group">
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-black/95 border border-white/15 shadow-[0_0_60px_rgba(255,108,44,0.18)] aspect-video group before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent">
+                {/* Top Feature Pill Badges */}
+                <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between pointer-events-none z-10 gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-slate-200 shadow-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    4K Real-Time Feed
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-orange-400 shadow-md">
+                    <Radar className="w-3 h-3 text-orange-400" />
+                    M.I.R.A.G.E. UGV
+                  </span>
+                </div>
+
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
@@ -745,12 +721,12 @@ export default function App() {
                   </p>
                 </video>
 
-                {/* Bottom Video Controls Overlay */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 opacity-90 transition-opacity">
-                  <div className="flex items-center gap-3">
+                {/* Bottom Video Controls Overlay Pill with 40px touch targets */}
+                <div className="absolute bottom-2.5 sm:bottom-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between bg-black/75 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-white/15 shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={togglePlay}
-                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none"
+                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
                       aria-label={isPlaying ? 'Pause video' : 'Play video'}
                     >
                       {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -758,15 +734,15 @@ export default function App() {
 
                     <button
                       onClick={toggleMute}
-                      className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none"
+                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
                       aria-label={isMuted ? 'Unmute video' : 'Mute video'}
                     >
                       {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                     </button>
                   </div>
 
-                  <div className="text-xs text-slate-300 font-medium tracking-wide">
-                    M.I.R.A.G.E. UGV
+                  <div className="text-[10px] sm:text-xs text-slate-300 font-medium tracking-wide truncate max-w-[130px] sm:max-w-none">
+                    Autonomous Telemetry Active
                   </div>
                 </div>
               </div>
@@ -775,9 +751,10 @@ export default function App() {
             {/* Right Column: Product Narrative & Acronym Breakdown */}
             <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
               <div className="space-y-3">
-                <span className="text-xs font-medium uppercase tracking-wider text-[#ff6c2c]">
-                  Flagship Defense Robotics
-                </span>
+                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#ff6c2c]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff6c2c]" />
+                  <span>Flagship Defense Robotics</span>
+                </div>
                 <h2 id="product-heading" className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.15]">
                   Product <span className="font-medium text-[#ff6c2c]">M.I.R.A.G.E.</span>
                 </h2>
@@ -813,10 +790,10 @@ export default function App() {
               <div className="pt-2">
                 <button
                   onClick={() => scrollToSection('technology')}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:underline"
+                  className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
                 >
                   <span>Explore technology capabilities</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
@@ -824,48 +801,51 @@ export default function App() {
         </div>
       </section>
 
-      {/* 5. Technology Section: Clean 3-Card Grid */}
+      {/* 5. Technology Section: Sleek 3-Card Bento Grid */}
       <section
         id="technology"
-        className="relative py-16 sm:py-24 lg:py-32 border-t border-slate-200/80 dark:border-white/5 bg-slate-50 dark:bg-[#07090e]"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#0d121f] text-slate-100 overflow-hidden"
         aria-labelledby="technology-heading"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-3 mb-10 sm:mb-14 lg:mb-16 text-center max-w-3xl mx-auto">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#0051bb] dark:text-[#0458ec]">
-              Core Capabilities
-            </span>
+        <div className="max-w-6xl mx-auto">
+          <div className="space-y-2.5 sm:space-y-3 mb-8 sm:mb-12 lg:mb-16 text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
+              <span>Core Capabilities</span>
+            </div>
             <h2
               id="technology-heading"
-              className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.15]"
+              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
             >
-              Technology <span className="font-medium text-[#0051bb] dark:text-[#0458ec]">Capabilities</span>
+              Technology <span className="font-medium text-[#3b82f6]">Capabilities</span>
             </h2>
-            <p className="text-base sm:text-lg font-normal leading-relaxed text-[#515154] dark:text-slate-400">
+            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-300">
               Advanced sub-surface sensing and autonomous robotics engineered to detect and classify explosive threats.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {coreTechnologies.map((card, idx) => {
               const Icon = card.icon;
               return (
                 <div
                   key={idx}
                   onMouseMove={handleMouseMove}
-                  className="card-spotlight p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-[#0051bb]/50 dark:hover:border-[#ff6c2c]/50 transition-all duration-300 group hover:-translate-y-1.5"
+                  className="card-spotlight relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-3xl bg-[#111726]/85 backdrop-blur-sm border border-slate-800/80 hover:border-blue-500/40 shadow-xl hover:shadow-[0_0_35px_rgba(59,130,246,0.15)] transition-all duration-300 group hover:-translate-y-1.5 sm:hover:-translate-y-2 flex flex-col justify-between before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/50 before:to-transparent"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-[#0051bb]/10 dark:bg-[#ff6c2c]/10 border border-slate-200 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform shadow-xs">
-                    <Icon className="w-6 h-6 text-[#0051bb] dark:text-[#ff6c2c]" />
+                  <div>
+                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 sm:mb-6 text-[#3b82f6] group-hover:scale-110 group-hover:border-[#ff6c2c]/40 group-hover:text-[#ff6c2c] group-hover:bg-[#ff6c2c]/10 transition-all duration-300 shadow-md">
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </div>
+
+                    <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white leading-snug mb-2 sm:mb-3 group-hover:text-blue-100 transition-colors">
+                      {card.title}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm lg:text-base font-normal leading-relaxed text-slate-300">
+                      {card.description}
+                    </p>
                   </div>
-
-                  <h3 className="text-lg sm:text-xl font-medium tracking-tight text-[#1d1d1f] dark:text-white leading-snug mb-3">
-                    {card.title}
-                  </h3>
-
-                  <p className="text-sm sm:text-base font-normal leading-relaxed text-[#515154] dark:text-slate-400">
-                    {card.description}
-                  </p>
                 </div>
               );
             })}
@@ -873,21 +853,28 @@ export default function App() {
         </div>
       </section>
 
-      {/* 6. Contact Section: Standard 2-Column Corporate Architecture */}
+      {/* 6. Contact Section: 21st.dev Floating Dark Glass Form & Details Architecture */}
       <section
         id="contact"
-        className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-slate-200/80 dark:border-white/5 bg-white dark:bg-[#07090e]"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-slate-100 overflow-hidden"
         aria-labelledby="contact-heading"
       >
-        <div className="mx-auto max-w-6xl">
-          <div className="space-y-3 mb-8 sm:mb-12">
-            <span className="text-xs font-medium uppercase tracking-wider text-[#0051bb] dark:text-[#0458ec]">
-              Direct Engagement
-            </span>
-            <h2 id="contact-heading" className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-              Contact <span className="font-medium text-[#0051bb] dark:text-[#0458ec]">Us</span>
+        {/* Subtle Ambient Radial Glow Container */}
+        <div
+          className="absolute -bottom-32 -right-32 w-80 sm:w-96 h-80 sm:h-96 bg-[#ff6c2c]/10 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="relative mx-auto max-w-6xl">
+          <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-10 lg:mb-12">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
+              <span>Direct Engagement</span>
+            </div>
+            <h2 id="contact-heading" className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]">
+              Contact <span className="font-medium text-[#3b82f6]">Us</span>
             </h2>
-            <p className="text-base sm:text-lg font-normal leading-relaxed text-[#515154] dark:text-slate-400 max-w-3xl">
+            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-300 max-w-3xl">
               If you have any questions regarding our defense robotics systems, field deployments, or partnerships, please
               fill out the form here. We do our best to respond within 1 business day.
             </p>
@@ -895,263 +882,240 @@ export default function App() {
 
           <div
             onMouseMove={handleMouseMove}
-            className="card-spotlight rounded-3xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/10 shadow-xl shadow-slate-900/5 dark:shadow-black/60 overflow-hidden"
+            className="card-spotlight relative rounded-2xl sm:rounded-3xl bg-[#0d121f]/90 backdrop-blur-xl border border-slate-800/90 shadow-2xl shadow-black/80 overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/40 before:to-transparent"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-200/80 dark:divide-white/10">
-              {/* Left Column: Contact Information Cards */}
-              <div className="lg:col-span-5 p-6 sm:p-8 space-y-6 bg-white/40 dark:bg-white/2">
-                <div className="space-y-1.5">
-                  <h3 className="text-lg sm:text-xl font-medium tracking-tight text-[#1d1d1f] dark:text-white">Contact Info</h3>
-                  <p className="text-xs sm:text-sm font-normal text-[#515154] dark:text-slate-400 leading-relaxed">
-                    Official defense communications and corporate headquarters.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3.5 pt-2">
-                  {/* Email */}
-                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 flex items-start justify-between gap-3.5 hover:border-[#0051bb]/40 dark:hover:border-[#ff6c2c]/40 transition-colors">
-                    <div className="flex items-start gap-3.5">
-                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-[#0051bb] dark:text-[#0458ec] shrink-0">
-                        <Mail className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                          Email
-                        </div>
-                        <a
-                          href="mailto:info@husoro.com"
-                          className="text-sm font-medium text-[#0051bb] dark:text-[#ff6c2c] hover:underline"
-                        >
-                          info@husoro.com
-                        </a>
-                      </div>
-                    </div>
-                    <button
-                      onClick={copyEmailToClipboard}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
-                      title="Copy Email"
-                    >
-                      {copiedEmail ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
-                  </div>
-
-                  {/* Address */}
-                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/60 border border-slate-200/70 dark:border-white/10 flex items-start gap-3.5 hover:border-[#0051bb]/40 dark:hover:border-[#ff6c2c]/40 transition-colors">
-                    <div className="p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-[#ff6c2c] shrink-0">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                        Address (Incubated At)
-                      </div>
-                      <address className="not-italic text-sm font-medium text-[#1d1d1f] dark:text-slate-200 mt-0.5 leading-relaxed">
-                        Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
-                      </address>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Contact Form with Label, Input, Textarea, Button structure */}
-              <div className="lg:col-span-7 p-6 sm:p-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-800/80">
+              {/* Left Column (lg:col-span-7): 21st.dev Floating Dark Glass Contact Form */}
+              <div className="lg:col-span-7 p-4 sm:p-8 lg:p-10 bg-black/20">
                 {formStatus.text && (
                   <div
-                    className={`mb-6 p-4 rounded-xl text-sm ${
+                    className={`mb-5 sm:mb-6 p-3.5 sm:p-4 rounded-xl text-xs sm:text-sm ${
                       formStatus.type === 'success'
-                        ? 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-                        : 'bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                        ? 'bg-emerald-950/40 border border-emerald-800 text-emerald-200'
+                        : 'bg-rose-950/40 border border-rose-800 text-rose-200'
                     }`}
                     role="alert"
                   >
-                    {formStatus.text}
+                    <div>{formStatus.text}</div>
+                    {whatsappRedirectUrl && (
+                      <div className="mt-2.5">
+                        <a
+                          href={whatsappRedirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition-colors"
+                        >
+                          <span>Open WhatsApp directly</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                <form onSubmit={handleContactSubmit} className="w-full space-y-4" noValidate>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form onSubmit={handleContactSubmit} className="w-full space-y-3.5 sm:space-y-4" noValidate>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Name *</label>
+                      <label className="text-xs font-medium text-slate-300">Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="Your full name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-[#1d1d1f] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0051bb] dark:focus:ring-[#ff6c2c] transition-all"
+                        className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Email *</label>
+                      <label className="text-xs font-medium text-slate-300">Email *</label>
                       <input
                         type="email"
                         required
                         placeholder="name@organization.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-[#1d1d1f] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0051bb] dark:focus:ring-[#ff6c2c] transition-all"
+                        className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Phone</label>
+                      <label className="text-xs font-medium text-slate-300">Phone</label>
                       <input
                         type="tel"
                         placeholder="+91-XXX-XXX-XXXX"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-[#1d1d1f] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0051bb] dark:focus:ring-[#ff6c2c] transition-all"
+                        className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Subject *</label>
+                      <label className="text-xs font-medium text-slate-300">Subject *</label>
                       <input
                         type="text"
                         required
                         placeholder="Inquiry or deployment focus"
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-[#1d1d1f] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0051bb] dark:focus:ring-[#ff6c2c] transition-all"
+                        className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Message *</label>
+                    <label className="text-xs font-medium text-slate-300">Message *</label>
                     <textarea
                       rows={4}
                       required
                       placeholder="Please describe your operational requirements or question..."
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-white/10 text-[#1d1d1f] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#0051bb] dark:focus:ring-[#ff6c2c] transition-all resize-none"
+                      className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none resize-none"
                     ></textarea>
                   </div>
 
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-medium tracking-wide text-white bg-linear-to-r from-[#ff6c2c] to-[#ff8042] hover:from-[#e5591c] hover:to-[#ff6c2c] shadow-md shadow-orange-500/25 hover:shadow-orange-500/35 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 min-h-[48px] rounded-xl text-sm font-semibold tracking-wide text-white bg-linear-to-r from-[#ff6c2c] to-[#ff8042] hover:from-[#e5591c] hover:to-[#ff6c2c] shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                     <span>{submitBtnText}</span>
                   </button>
                 </form>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 7. Location Section: Ultra-Minimalist 40/60 Split Card */}
-      <section id="location" className="relative py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-slate-100/50 dark:bg-[#06080d] border-t border-slate-200/60 dark:border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-sm bg-white dark:bg-slate-900/60 overflow-hidden p-2 sm:p-3">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
-              {/* 40% Column (lg:col-span-5): Ultra-Minimalist Address & Directions Card */}
-              <div className="lg:col-span-5 p-5 sm:p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-white/5 flex flex-col justify-between gap-5">
-                <div className="space-y-3.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-[#0051bb] dark:text-[#ff6c2c] px-2.5 py-1 rounded-md bg-blue-50 dark:bg-[#ff6c2c]/10 border border-blue-100 dark:border-[#ff6c2c]/20">
-                      Campus Location
-                    </span>
-                  </div>
-
+              {/* Right Column (lg:col-span-5): Contact Information Cards */}
+              <div className="lg:col-span-5 p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 bg-white/2 flex flex-col justify-between">
+                <div>
                   <div className="space-y-1.5">
-                    <h3 className="text-base sm:text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
-                      IIT HYDERABAD
-                    </h3>
-                    <p className="text-xs sm:text-sm font-normal text-[#515154] dark:text-slate-300 leading-relaxed">
-                      Technology Innovation Park, Kandi, Sangareddy, Telangana, India - 502284
+                    <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white">Contact Info</h3>
+                    <p className="text-xs sm:text-sm font-normal text-slate-400 leading-relaxed">
+                      Official defense communications and corporate headquarters.
                     </p>
                   </div>
+
+                  <div className="grid grid-cols-1 gap-2.5 sm:gap-3.5 pt-3 sm:pt-4">
+                    {/* Email */}
+                    <div className="group p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#090d16]/90 border border-slate-800/80 hover:border-blue-500/40 hover:bg-[#0c121e] transition-all flex items-start justify-between gap-3 sm:gap-3.5">
+                      <div className="flex items-start gap-3 sm:gap-3.5 min-w-0">
+                        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#3b82f6] group-hover:scale-105 group-hover:text-blue-400 transition-all shrink-0">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
+                            Email
+                          </div>
+                          <a
+                            href="mailto:info@husoro.com"
+                            className="text-xs sm:text-sm font-medium text-[#3b82f6] hover:text-[#ff6c2c] hover:underline transition-colors break-all"
+                          >
+                            info@husoro.com
+                          </a>
+                        </div>
+                      </div>
+                      <button
+                        onClick={copyEmailToClipboard}
+                        className="min-w-[36px] min-h-[36px] p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                        title="Copy Email"
+                        aria-label="Copy Email to clipboard"
+                      >
+                        {copiedEmail ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Address */}
+                    <div className="group p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#090d16]/90 border border-slate-800/80 hover:border-[#ff6c2c]/40 hover:bg-[#0c121e] transition-all flex items-start gap-3 sm:gap-3.5">
+                      <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-orange-500/10 border border-orange-500/20 text-[#ff6c2c] group-hover:scale-105 group-hover:text-orange-400 transition-all shrink-0">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Address (Incubated At)
+                        </div>
+                        <address className="not-italic text-xs sm:text-sm font-medium text-slate-200 mt-0.5 leading-relaxed break-words">
+                          Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
+                        </address>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <a
-                    href="https://www.google.com/maps/dir//Indian+Institute+of+Technology,+Hyderabad,+Kandi,+Telangana+502284"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-white bg-linear-to-r from-[#0051bb] to-[#0458ec] dark:from-[#ff6c2c] dark:to-[#ff8042] shadow-xs hover:opacity-95 transition-all cursor-pointer"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    <span>Get Directions</span>
-                    <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                  </a>
+                <div className="pt-3.5 sm:pt-4 border-t border-slate-800/60">
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs text-slate-400">Direct response within 1 business day</span>
+                  </div>
                 </div>
-              </div>
-
-              {/* 60% Column (lg:col-span-7): Embedded Map */}
-              <div className="lg:col-span-7 rounded-2xl overflow-hidden border border-slate-200/60 dark:border-white/5 min-h-[200px] sm:min-h-[240px]">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.746083111458!2d78.12281607493596!3d17.591350883259838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcbe918233b3e69%3A0x28975bb42111eb9f!2sIndian%20Institute%20of%20Technology%2C%20Hyderabad!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen={false}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="HUSORO Technologies location at Technology Innovation Park, IIT Hyderabad"
-                  aria-label="Interactive map showing HUSORO Technologies location at IIT Hyderabad"
-                  className="w-full h-full min-h-[220px] sm:min-h-[260px] grayscale contrast-115 dark:opacity-85"
-                ></iframe>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 8. Footer: Minimalist, Clean & Corporate */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#07090e] text-[#515154] dark:text-slate-400 text-xs">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* Footer: Clean Minimal Tactical Footer with Refined Dividers & Muted Social Pill Links */}
+      <footer className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800/80 bg-[#05070a] text-slate-400 text-xs">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           {/* Logo & Brand Wordmark */}
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 flex items-center justify-center rounded-lg bg-linear-to-br from-[#0051bb] to-[#0458ec] p-1 shadow-sm">
-              <img src="/logo.svg" alt="HUSORO Logo" className="w-full h-full object-contain filter brightness-0 invert" />
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg overflow-hidden bg-black border border-white/20 shadow-sm shrink-0">
+                <img
+                  src={BRAND_LOGO}
+                  alt="HUSORO Technologies Logo"
+                  width={32}
+                  height={32}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="font-bold text-white tracking-tight text-sm font-ubuntu">
+                HUSORO Technologies
+              </span>
             </div>
-            <span className="font-medium text-[#1d1d1f] dark:text-white tracking-tight text-sm">
-              HUSORO Technologies
-            </span>
-            <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
-            <span className="hidden sm:inline text-[#515154] dark:text-slate-400 font-normal">
+            <span className="hidden sm:inline text-slate-700">|</span>
+            <span className="text-slate-400 font-normal text-xs">
               Incubated at iTIC Foundation, IIT Hyderabad
             </span>
           </div>
 
-          {/* Quick Nav Mirror */}
-          <div className="flex flex-wrap items-center justify-center gap-6 font-medium">
-            <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+          {/* Quick Nav Mirror with touch-friendly spacing */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-6 font-medium text-xs sm:text-sm">
+            <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
               Home
             </a>
-            <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+            <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
               About
             </a>
-            <a href="#product" onClick={(e) => { e.preventDefault(); scrollToSection('product'); }} className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+            <a href="#product" onClick={(e) => { e.preventDefault(); scrollToSection('product'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
               Product
             </a>
-            <a href="#technology" onClick={(e) => { e.preventDefault(); scrollToSection('technology'); }} className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+            <a href="#technology" onClick={(e) => { e.preventDefault(); scrollToSection('technology'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
               Technology
             </a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
+            <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
               Contact
             </a>
             <a
               href="https://www.linkedin.com/company/husoro-technologies/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#515154] dark:text-slate-400 hover:text-[#1d1d1f] dark:hover:text-white transition-colors inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-[#0077b5]/50 hover:bg-[#0077b5]/10 hover:text-white text-slate-300 transition-all text-xs font-medium"
+              aria-label="HUSORO Technologies LinkedIn"
+              title="LinkedIn"
             >
-              <span>Updates</span>
-              <ExternalLink className="w-3 h-3" />
+              <LinkedInIcon className="w-3.5 h-3.5 text-[#0077b5]" />
+              <span>LinkedIn</span>
             </a>
           </div>
 
           {/* Clean Copyright */}
           <div>
-            <p className="font-normal text-slate-400 dark:text-slate-500">&copy; 2024–2026 HUSORO Technologies. All rights reserved.</p>
+            <p className="font-normal text-slate-500 text-[11px] sm:text-xs">&copy; 2024–2026 HUSORO Technologies. All rights reserved.</p>
           </div>
         </div>
       </footer>
