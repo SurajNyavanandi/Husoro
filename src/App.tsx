@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Radar,
-  Shield,
   Radio,
   Layers,
   ArrowRight,
-  ExternalLink,
   MapPin,
   Mail,
   Send,
@@ -17,10 +15,6 @@ import {
   Volume2,
   VolumeX,
   Copy,
-  Compass,
-  Cpu,
-  Calendar,
-  Building2,
 } from 'lucide-react';
 
 const HUSORO_LETTERS = ['H', 'U', 'S', 'O', 'R', 'O'];
@@ -199,7 +193,7 @@ export default function App() {
   });
   const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitBtnText, setSubmitBtnText] = useState('Submit & Send to WhatsApp');
+  const [submitBtnText, setSubmitBtnText] = useState('Submit');
 
   // Sync dark mode class on document & localStorage
   useEffect(() => {
@@ -278,7 +272,7 @@ export default function App() {
     }
 
     setSubmitting(true);
-    setSubmitBtnText('Redirecting to WhatsApp...');
+    setSubmitBtnText('Submitting...');
 
     // Format all inquiry fields for WhatsApp
     const whatsappText =
@@ -311,7 +305,7 @@ export default function App() {
     // Directly redirect to WhatsApp
     setTimeout(() => {
       window.location.href = targetUrl;
-      setSubmitBtnText('Submitted to WhatsApp');
+      setSubmitBtnText('Submitted');
       setSubmitting(false);
     }, 350);
   };
@@ -394,9 +388,6 @@ export default function App() {
               <div className="flex flex-col">
                 <span className="font-bold tracking-tight text-base sm:text-lg font-ubuntu text-white">
                   HUSORO
-                </span>
-                <span className="text-[9px] tracking-widest uppercase font-semibold font-ubuntu text-slate-400">
-                  Technologies
                 </span>
               </div>
             </a>
@@ -545,118 +536,48 @@ export default function App() {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
-            {/* Left Column: Authentic Mission Story */}
-            <div className="lg:col-span-7 space-y-5 sm:space-y-6">
-              <div className="space-y-2.5 sm:space-y-3">
-                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
-                  <span>Who We Are</span>
-                </div>
-                <h2
-                  id="about-heading"
-                  className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
-                >
-                  About <span className="font-medium text-[#3b82f6]">HUSORO Technologies</span>
-                </h2>
+        <div className="relative mx-auto max-w-4xl">
+          <div className="space-y-5 sm:space-y-6">
+            <div className="space-y-2.5 sm:space-y-3">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
+                <span>Who We Are</span>
               </div>
-
-              <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
-                <p>
-                  Established in 2024, <strong className="font-medium text-white">HUSORO Technologies</strong> is
-                  a deep-tech company dedicated to advancing the field of unmanned robotics. Our mission is to protect human lives and
-                  transform critical operations through intelligent, reliable, and purpose-driven robotic systems.
-                </p>
-
-                <p>
-                  Built on a strong foundation of in-house research and development, HUSORO combines expertise in{' '}
-                  <strong className="font-medium text-white">AI, autonomy, and advanced sensing</strong> to deliver
-                  technologies that are both robust and future-ready.
-                </p>
-
-                <p>
-                  With a clear focus on innovation, precision, and real-world impact, HUSORO is shaping the next generation of robotic
-                  solutions where technology serves humanity with trust, adaptability, and purpose.
-                </p>
-              </div>
-
-              <div className="pt-1 sm:pt-2">
-                <button
-                  onClick={() => scrollToSection('product')}
-                  className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
-                >
-                  <span>Discover our flagship UGV</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
+              <h2
+                id="about-heading"
+                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
+              >
+                About <span className="font-medium text-[#3b82f6]">HUSORO</span>
+              </h2>
             </div>
 
-            {/* Right Column: Modern Split Spotlight Facility Card (21st.dev Pattern) */}
-            <div className="lg:col-span-5">
-              <div
-                onMouseMove={handleMouseMove}
-                className="card-spotlight relative p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-[#111726]/90 border border-slate-800/80 shadow-2xl shadow-black/60 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/40 before:to-transparent hover:border-slate-700 transition-colors"
-              >
-                <div className="space-y-1 mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white">
-                    Organization Details
-                  </h3>
-                  <p className="text-xs font-normal text-slate-400">
-                    Defense robotics firm incubated at iTIC Foundation, IIT Hyderabad.
-                  </p>
-                </div>
+            <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
+              <p>
+                Established in 2024, <strong className="font-medium text-white">HUSORO Technologies</strong> is
+                a deep-tech company dedicated to advancing the field of unmanned robotics. Our mission is to protect human lives and
+                transform critical operations through intelligent, reliable, and purpose-driven robotic systems.
+              </p>
 
-                <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
-                  {[
-                    {
-                      icon: Building2,
-                      label: 'Incubation Support',
-                      value: 'Incubated at iTIC Foundation, IIT Hyderabad',
-                    },
-                    {
-                      icon: Calendar,
-                      label: 'Founding Year',
-                      value: 'Established 2024',
-                    },
-                    {
-                      icon: Shield,
-                      label: 'Core Objective',
-                      value: 'Protecting Human Lives in Critical Operations',
-                    },
-                    {
-                      icon: Cpu,
-                      label: 'Technical Expertise',
-                      value: 'AI, Autonomy, & Advanced Sensing',
-                    },
-                    {
-                      icon: MapPin,
-                      label: 'Facility Location',
-                      value: 'Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284',
-                    },
-                  ].map((info, i) => {
-                    const Icon = info.icon;
-                    return (
-                      <div
-                        key={i}
-                        className="group p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#090d16]/85 border border-slate-800/80 hover:border-blue-500/30 hover:bg-[#0d1322] transition-all flex items-start gap-3 sm:gap-3.5"
-                      >
-                        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#3b82f6] group-hover:scale-105 group-hover:text-blue-400 transition-all shrink-0 shadow-xs">
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            {info.label}
-                          </div>
-                          <div className="text-xs sm:text-sm font-medium text-slate-200 mt-0.5 leading-snug break-words">
-                            {info.value}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <p>
+                Built on a strong foundation of in-house research and development, HUSORO combines expertise in{' '}
+                <strong className="font-medium text-white">AI, autonomy, and advanced sensing</strong> to deliver
+                technologies that are both robust and future-ready.
+              </p>
+
+              <p>
+                With a clear focus on innovation, precision, and real-world impact, HUSORO is shaping the next generation of robotic
+                solutions where technology serves humanity with trust, adaptability, and purpose.
+              </p>
+            </div>
+
+            <div className="pt-1 sm:pt-2">
+              <button
+                onClick={() => scrollToSection('product')}
+                className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
+              >
+                <span>Discover our flagship UGV</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
         </div>
@@ -876,7 +797,7 @@ export default function App() {
             </h2>
             <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-300 max-w-3xl">
               If you have any questions regarding our defense robotics systems, field deployments, or partnerships, please
-              fill out the form here. We do our best to respond within 1 business day.
+              fill out the form here.
             </p>
           </div>
 
@@ -1043,13 +964,6 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-
-                <div className="pt-3.5 sm:pt-4 border-t border-slate-800/60">
-                  <div className="flex items-center gap-2.5 sm:gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-xs text-slate-400">Direct response within 1 business day</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1074,7 +988,7 @@ export default function App() {
                 />
               </div>
               <span className="font-bold text-white tracking-tight text-sm font-ubuntu">
-                HUSORO Technologies
+                HUSORO
               </span>
             </div>
             <span className="hidden sm:inline text-slate-700">|</span>
@@ -1115,7 +1029,7 @@ export default function App() {
 
           {/* Clean Copyright */}
           <div>
-            <p className="font-normal text-slate-500 text-[11px] sm:text-xs">&copy; 2024–2026 HUSORO Technologies. All rights reserved.</p>
+            <p className="font-normal text-slate-500 text-[11px] sm:text-xs">&copy; 2024–2026 HUSORO. All rights reserved.</p>
           </div>
         </div>
       </footer>
