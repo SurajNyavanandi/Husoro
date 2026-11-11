@@ -569,16 +569,6 @@ export default function App() {
                 solutions where technology serves humanity with trust, adaptability, and purpose.
               </p>
             </div>
-
-            <div className="pt-1 sm:pt-2">
-              <button
-                onClick={() => scrollToSection('product')}
-                className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
-              >
-                <span>Discover our flagship UGV</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -730,10 +720,6 @@ export default function App() {
       >
         <div className="max-w-6xl mx-auto">
           <div className="space-y-2.5 sm:space-y-3 mb-8 sm:mb-12 lg:mb-16 text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
-              <span>Core Capabilities</span>
-            </div>
             <h2
               id="technology-heading"
               className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
@@ -866,7 +852,6 @@ export default function App() {
                       <label className="text-xs font-medium text-slate-300">Phone</label>
                       <input
                         type="tel"
-                        placeholder="+91-XXX-XXX-XXXX"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
@@ -955,7 +940,7 @@ export default function App() {
                       </div>
                       <div className="min-w-0">
                         <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Address (Incubated At)
+                          Address
                         </div>
                         <address className="not-italic text-xs sm:text-sm font-medium text-slate-200 mt-0.5 leading-relaxed break-words">
                           Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
