@@ -14,10 +14,10 @@ import {
   Pause,
   Volume2,
   VolumeX,
+  Maximize,
+  Minimize,
   Copy,
 } from 'lucide-react';
-
-const HUSORO_LETTERS = ['H', 'U', 'S', 'O', 'R', 'O'];
 
 const BRAND_LOGO = 'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
 
@@ -176,8 +176,10 @@ export default function App() {
 
   // Video state
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Contact Form State
   const [formData, setFormData] = useState({
@@ -252,6 +254,87 @@ export default function App() {
     if (!v) return;
     v.muted = !v.muted;
     setIsMuted(v.muted);
+  };
+
+  // Track fullscreen changes across standard and vendor prefixes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFs = !!(
+        document.fullscreenElement ||
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      );
+      setIsFullscreen(isFs);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    const video = videoRef.current;
+    const onWebkitBegin = () => setIsFullscreen(true);
+    const onWebkitEnd = () => setIsFullscreen(false);
+    if (video) {
+      video.addEventListener('webkitbeginfullscreen', onWebkitBegin);
+      video.addEventListener('webkitendfullscreen', onWebkitEnd);
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      if (video) {
+        video.removeEventListener('webkitbeginfullscreen', onWebkitBegin);
+        video.removeEventListener('webkitendfullscreen', onWebkitEnd);
+      }
+    };
+  }, []);
+
+  // Toggle video full screen across desktop and mobile devices
+  const toggleFullscreen = async () => {
+    const container = videoContainerRef.current;
+    const video = videoRef.current;
+    if (!container || !video) return;
+
+    const isCurrentlyFs = !!(
+      document.fullscreenElement ||
+      (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+    );
+
+    if (isCurrentlyFs) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen().catch(() => {});
+      } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+        await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    } else {
+      // Desktop / Android fullscreen request on the container
+      if (container.requestFullscreen) {
+        try {
+          await container.requestFullscreen();
+          setIsFullscreen(true);
+          return;
+        } catch {
+          // fallback to video element
+        }
+      } else if ((container as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+        try {
+          await (container as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
+          setIsFullscreen(true);
+          return;
+        } catch {
+          // fallback to video element
+        }
+      }
+
+      // iOS Safari fallback (only video elements can go fullscreen on iPhone)
+      const webkitVideo = video as unknown as {
+        webkitEnterFullscreen?: () => void;
+      };
+      if (webkitVideo.webkitEnterFullscreen) {
+        webkitVideo.webkitEnterFullscreen();
+      } else if (video.requestFullscreen) {
+        await video.requestFullscreen().catch(() => {});
+      }
+    }
   };
 
   // Contact Form Submission with WhatsApp redirection
@@ -357,43 +440,88 @@ export default function App() {
       {/* 1. Floating Frosted-Glass Header Pill (21st.dev / Tailwind UI Pattern) */}
       <div className="fixed top-0 inset-x-0 z-50 px-3 sm:px-6 pt-3 sm:pt-4 pointer-events-none">
         <header
-          className={`max-w-6xl mx-auto pointer-events-auto rounded-2xl transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 border backdrop-blur-md shadow-2xl shadow-black/40 ${
-            isScrolled
-              ? 'bg-[#090d16]/90 border-white/15 shadow-black/60'
-              : 'bg-slate-900/80 border-white/10'
+          className={`max-w-6xl mx-auto pointer-events-auto rounded-2xl transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 ${
+            isScrolled || mobileMenuOpen
+              ? 'bg-[#080d1a]/55 backdrop-blur-md border border-white/10 shadow-xl'
+              : 'bg-transparent border-0 shadow-none backdrop-blur-none'
           }`}
         >
           <div className="flex items-center justify-between gap-4">
-            {/* Zone 1: Brand Wordmark & Geometric Emblem */}
-            <a
-              href="#home"
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection('home');
-              }}
-              className="group flex items-center gap-2.5 sm:gap-3 whitespace-nowrap shrink-0 focus:outline-none"
-              aria-label="HUSORO Technologies Home"
-            >
-              <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg overflow-hidden bg-black border border-white/20 shadow-md group-hover:scale-105 transition-transform duration-200 shrink-0">
-                <img
-                  src={BRAND_LOGO}
-                  alt="HUSORO Technologies Defense Robotics Logo Emblem"
-                  width={36}
-                  height={36}
-                  loading="eager"
-                  decoding="async"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold tracking-tight text-base sm:text-lg font-ubuntu text-white">
-                  HUSORO
-                </span>
-              </div>
-            </a>
+            {/* Left Group: Brand Logo & Left-Aligned Nav Links (Silhouetted over Dark Antenna Area) */}
+            <div className="flex items-center gap-6 lg:gap-10">
+              {/* Zone 1: Brand Wordmark & Geometric Emblem */}
+              <a
+                href="#home"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection('home');
+                }}
+                className="group flex items-center gap-2.5 sm:gap-3 whitespace-nowrap shrink-0 focus:outline-none"
+                aria-label="HUSORO Technologies Home"
+              >
+                <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-200 shrink-0">
+                  <img
+                    src={BRAND_LOGO}
+                    alt="HUSORO Technologies Defense Robotics Logo Emblem"
+                    width={36}
+                    height={36}
+                    loading="eager"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-extrabold tracking-tight text-base sm:text-lg font-ubuntu bg-gradient-to-r from-amber-100 via-[#ffd285] to-[#ff8c42] bg-clip-text text-transparent drop-shadow-sm">
+                    HUSORO
+                  </span>
+                </div>
+              </a>
 
-            {/* Zone 2: Clean Nav Links with Active Indicator Pill */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 p-1 rounded-xl bg-black/25 border border-white/5">
+              {/* Zone 2: Navigation Links Moved to the Left next to HUSORO */}
+              <nav className="hidden md:flex items-center gap-1 sm:gap-2 bg-transparent border-0 p-0">
+                {NAV_LINKS.map((item) => {
+                  const isActive = activeSection === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        scrollToSection(item.id);
+                      }}
+                      className={`relative px-3.5 py-1.5 rounded-lg text-xs lg:text-sm font-semibold tracking-normal transition-all whitespace-nowrap shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] ${
+                        isScrolled
+                          ? isActive
+                            ? 'bg-amber-400/20 text-[#ffd285] shadow-xs border border-amber-400/30 backdrop-blur-xs'
+                            : 'text-amber-100/85 hover:text-white hover:bg-white/10'
+                          : isActive
+                            ? 'text-transparent bg-gradient-to-r from-[#ffd285] to-[#ff8c42] bg-clip-text font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] after:content-[\'\'] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-gradient-to-r after:from-[#ffd285] after:to-[#ff8c42] after:rounded-full after:shadow-sm'
+                            : 'text-amber-100/90 hover:text-white transition-colors'
+                      }`}
+                    >
+                      {item.label}
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Zone 3: Mobile Toggle */}
+            <div className="flex md:hidden items-center shrink-0">
+              {/* Mobile Menu Hamburger with 44px touch target */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-amber-200 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40 drop-shadow-sm cursor-pointer"
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Dropdown Menu: Seamlessly part of the single outer frosted card */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-3 pt-3 border-t border-white/10 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
               {NAV_LINKS.map((item) => {
                 const isActive = activeSection === item.id;
                 return (
@@ -404,51 +532,21 @@ export default function App() {
                       e.preventDefault();
                       scrollToSection(item.id);
                     }}
-                    className={`relative px-3.5 py-1.5 rounded-lg text-xs lg:text-sm font-medium tracking-normal transition-all whitespace-nowrap shrink-0 ${
+                    className={`block px-3 py-2.5 min-h-[44px] flex items-center rounded-xl text-base transition-colors ${
                       isActive
-                        ? 'bg-white/15 text-white font-semibold shadow-xs border border-white/15'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                        ? 'bg-amber-400/10 text-transparent bg-gradient-to-r from-[#ffd285] to-[#ff8c42] bg-clip-text font-bold border border-amber-400/25'
+                        : 'text-amber-100/90 hover:text-white hover:bg-white/5 active:bg-white/10'
                     }`}
                   >
-                    {item.label}
+                    <span className="flex items-center gap-2.5">
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#ffd285] to-[#ff8c42] shadow-[0_0_8px_#ffd285]" />
+                      )}
+                      <span>{item.label}</span>
+                    </span>
                   </a>
                 );
               })}
-            </nav>
-
-            {/* Zone 3: Mobile Toggle */}
-            <div className="flex md:hidden items-center shrink-0">
-              {/* Mobile Menu Hamburger with 44px touch target */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/10 active:bg-white/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 cursor-pointer"
-                aria-label="Toggle Navigation Menu"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Dropdown Menu with touch-friendly targets */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-3 pt-3 border-t border-white/10 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-              {NAV_LINKS.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(item.id);
-                  }}
-                  className={`block px-4 py-3 min-h-[44px] flex items-center rounded-xl text-sm font-medium transition-colors ${
-                    activeSection === item.id
-                      ? 'bg-white/15 text-white font-semibold border border-white/15'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5 active:bg-white/10'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
             </div>
           )}
         </header>
@@ -469,7 +567,7 @@ export default function App() {
             loading="eager"
             fetchPriority="high"
             decoding="async"
-            className="w-full h-full object-cover object-center filter brightness-[0.72] contrast-115 scale-100"
+            className="w-full h-full object-cover object-center filter brightness-100 contrast-105 scale-100"
             referrerPolicy="no-referrer"
           />
 
@@ -495,72 +593,55 @@ export default function App() {
             <div className="w-1/3 h-[200%] bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-beam-sweep blur-md" />
           </div>
 
-          {/* Smooth Vignette blending top nav and bottom section (#07090e) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/30 to-[#07090e]" />
-          <div className="absolute inset-0 bg-black/20" />
+          {/* Edge blend into lower section with zero top darkening under the header */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 pointer-events-none" />
         </div>
 
         {/* Subtle Canvas Radar Grid Background */}
         <RadarCanvas darkMode={true} />
 
         <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center">
-          <h1 className="font-ubuntu text-xl xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-normal sm:tracking-tight leading-snug sm:leading-tight text-white drop-shadow-[0_8px_30px_rgba(0,0,0,0.85)] flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3.5 gap-y-1.5 sm:gap-y-2 uppercase text-center max-w-4xl mx-auto px-2 sm:px-4">
-            <span className="inline-flex items-center gap-0.5 sm:gap-1 text-white">
-              {HUSORO_LETTERS.map((letter, index) => (
-                <span
-                  key={index}
-                  className="animate-letter-fall cursor-default hover:text-[#ff6c2c] transition-colors duration-200 inline-block transform"
-                  style={{
-                    animationDelay: `${0.12 + index * 0.12}s`,
-                  }}
-                  title={letter}
-                >
-                  {letter}
-                </span>
-              ))}
-            </span>
-            <span className="text-white">ROBOTS DESIGNED TO SAVE, PROTECT, &amp; SERVE</span>
-          </h1>
+          <div className="filter drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)]">
+            <h1 className="font-ubuntu text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight uppercase text-center max-w-5xl mx-auto px-3 sm:px-6 bg-gradient-to-r from-amber-100 via-[#ffd285] to-[#ff8c42] bg-clip-text text-transparent">
+              ROBOTS DESIGNED TO SAVE, PROTECT, &amp; SERVE
+            </h1>
+          </div>
         </div>
       </section>
 
-      {/* 3. About Us Section: Alternating Zig-Zag (Left: Narrative / Right: Modern Split Spotlight Card) */}
+      {/* 3. About Us Section: Clean High-Contrast Light Section */}
       <section
         id="about"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-b border-slate-800/80 bg-[#0d121f] text-slate-100 overflow-hidden"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-b border-slate-200/80 bg-white text-slate-900 overflow-hidden"
         aria-labelledby="about-heading"
       >
         {/* Subtle background ambient radial glow */}
         <div
-          className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-blue-600/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"
+          className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-blue-500/5 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"
           aria-hidden="true"
         />
 
         <div className="relative mx-auto max-w-4xl">
           <div className="space-y-5 sm:space-y-6">
-            <div className="space-y-2.5 sm:space-y-3">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
-                <span>Who We Are</span>
-              </div>
+            <div>
               <h2
                 id="about-heading"
-                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
+                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15]"
               >
-                About <span className="font-medium text-[#3b82f6]">HUSORO</span>
+                About <span className="font-semibold text-[#0051bb]">HUSORO</span>
               </h2>
             </div>
 
-            <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
+            <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-600">
               <p>
-                Established in 2024, <strong className="font-medium text-white">HUSORO Technologies</strong> is
+                Established in 2024, <strong className="font-semibold text-slate-900">HUSORO Technologies</strong> is
                 a deep-tech company dedicated to advancing the field of unmanned robotics. Our mission is to protect human lives and
                 transform critical operations through intelligent, reliable, and purpose-driven robotic systems.
               </p>
 
               <p>
                 Built on a strong foundation of in-house research and development, HUSORO combines expertise in{' '}
-                <strong className="font-medium text-white">AI, autonomy, and advanced sensing</strong> to deliver
+                <strong className="font-semibold text-slate-900">AI, autonomy, and advanced sensing</strong> to deliver
                 technologies that are both robust and future-ready.
               </p>
 
@@ -584,149 +665,157 @@ export default function App() {
           aria-hidden="true"
         />
 
-        <div className="relative max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 items-center">
-            {/* Left Column: Interactive Video Showcase Card (21st.dev Pattern) */}
-            <div className="lg:col-span-6 order-2 lg:order-1">
-              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-black/95 border border-white/15 shadow-[0_0_60px_rgba(255,108,44,0.18)] aspect-video group before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent">
-                {/* Top Feature Pill Badges */}
-                <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between pointer-events-none z-10 gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-slate-200 shadow-md">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    4K Real-Time Feed
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-orange-400 shadow-md">
-                    <Radar className="w-3 h-3 text-orange-400" />
-                    M.I.R.A.G.E. UGV
-                  </span>
-                </div>
+        <div className="relative max-w-5xl mx-auto space-y-8 sm:space-y-12">
+          {/* Top: Product Narrative & Acronym Breakdown (Above Video on Desktop & Mobile) */}
+          <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-5">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#ff6c2c]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff6c2c]" />
+              <span>Flagship Defense Robotics</span>
+            </div>
+            <h2 id="product-heading" className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.15]">
+              Product <span className="font-medium text-[#ff6c2c]">M.I.R.A.G.E.</span>
+            </h2>
 
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  preload="auto"
-                  aria-label="M.I.R.A.G.E. product demonstration video"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                >
-                  <source
-                    src="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
-                    type="video/mp4"
-                  />
-                  <source src="/intro_video.mp4" type="video/mp4" />
-                  <p>
-                    Your browser does not support the video tag.{' '}
-                    <a
-                      href="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="underline text-[#ff6c2c]"
-                    >
-                      Download video
-                    </a>
-                    .
-                  </p>
-                </video>
+            <h3 className="text-base sm:text-lg font-normal text-slate-300 tracking-tight">
+              <span className="text-[#ff6c2c] font-medium">M</span>inefield{' '}
+              <span className="text-[#ff6c2c] font-medium">I</span>ntelligent{' '}
+              <span className="text-[#ff6c2c] font-medium">R</span>adar and{' '}
+              <span className="text-[#ff6c2c] font-medium">A</span>utonomous{' '}
+              <span className="text-[#ff6c2c] font-medium">G</span>round{' '}
+              <span className="text-[#ff6c2c] font-medium">E</span>xplorer
+            </h3>
 
-                {/* Bottom Video Controls Overlay Pill with 40px touch targets */}
-                <div className="absolute bottom-2.5 sm:bottom-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between bg-black/75 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-white/15 shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={togglePlay}
-                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-                      aria-label={isPlaying ? 'Pause video' : 'Play video'}
-                    >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    </button>
+            <div className="space-y-3.5 text-sm sm:text-base font-normal leading-relaxed text-slate-300 max-w-2xl mx-auto">
+              <p>
+                <strong className="font-medium text-white">M.I.R.A.G.E.</strong> is an advanced{' '}
+                <strong className="font-medium text-white">military-grade UGV</strong> engineered for intelligent{' '}
+                <strong className="font-medium text-white">landmine detection and classification</strong>.
+              </p>
 
-                    <button
-                      onClick={toggleMute}
-                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-                      aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-                    >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    </button>
-                  </div>
+              <p>
+                It employs <strong className="font-medium text-white">sensor fusion technology</strong>, combining data from
+                multiple sensors and advanced radar systems to accurately identify buried threats in real time.
+              </p>
 
-                  <div className="text-[10px] sm:text-xs text-slate-300 font-medium tracking-wide truncate max-w-[130px] sm:max-w-none">
-                    Autonomous Telemetry Active
-                  </div>
-                </div>
-              </div>
+              <p>
+                Designed for reliability in challenging terrains, M.I.R.A.G.E enhances operational safety, precision, and
+                efficiency in <strong className="font-medium text-white">demining missions</strong>.
+              </p>
             </div>
 
-            {/* Right Column: Product Narrative & Acronym Breakdown */}
-            <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#ff6c2c]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff6c2c]" />
-                  <span>Flagship Defense Robotics</span>
+            <div className="pt-2">
+              <button
+                onClick={() => scrollToSection('technology')}
+                className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
+              >
+                <span>Explore technology capabilities</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom: Full-Width Cinematic Video Showcase Card (Responsive Cinema Display) */}
+          <div className="w-full">
+            <div
+              ref={videoContainerRef}
+              className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-black/95 border border-white/15 shadow-[0_0_70px_rgba(255,108,44,0.22)] aspect-video w-full group before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent [&:fullscreen]:rounded-none [&:fullscreen]:border-0 [&:fullscreen]:shadow-none [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:flex [&:fullscreen]:items-center [&:fullscreen]:justify-center [&:fullscreen]:bg-black"
+            >
+              {/* Top Feature Pill Badges */}
+              <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between pointer-events-none z-10 gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-slate-200 shadow-md">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  4K Real-Time Feed
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-orange-400 shadow-md">
+                  <Radar className="w-3 h-3 text-orange-400" />
+                  M.I.R.A.G.E. UGV
+                </span>
+              </div>
+
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover group-[:fullscreen]:object-contain"
+                autoPlay
+                muted={isMuted}
+                loop
+                playsInline
+                preload="auto"
+                aria-label="M.I.R.A.G.E. product demonstration video"
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+              >
+                <source
+                  src="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
+                  type="video/mp4"
+                />
+                <source src="/intro_video.mp4" type="video/mp4" />
+                <p>
+                  Your browser does not support the video tag.{' '}
+                  <a
+                    href="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline text-[#ff6c2c]"
+                  >
+                    Download video
+                  </a>
+                  .
+                </p>
+              </video>
+
+              {/* Bottom Video Controls Overlay Pill with 40px touch targets */}
+              <div className="absolute bottom-2.5 sm:bottom-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between bg-black/75 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-white/15 shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={togglePlay}
+                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                    aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                  >
+                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  </button>
+
+                  <button
+                    onClick={toggleMute}
+                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                  >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+
+                  <button
+                    onClick={toggleFullscreen}
+                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                    title={isFullscreen ? 'Exit fullscreen' : 'Full screen'}
+                  >
+                    {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                  </button>
                 </div>
-                <h2 id="product-heading" className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.15]">
-                  Product <span className="font-medium text-[#ff6c2c]">M.I.R.A.G.E.</span>
-                </h2>
 
-                <h3 className="text-base sm:text-lg font-normal text-slate-300 tracking-tight">
-                  <span className="text-[#ff6c2c] font-medium">M</span>inefield{' '}
-                  <span className="text-[#ff6c2c] font-medium">I</span>ntelligent{' '}
-                  <span className="text-[#ff6c2c] font-medium">R</span>adar and{' '}
-                  <span className="text-[#ff6c2c] font-medium">A</span>utonomous{' '}
-                  <span className="text-[#ff6c2c] font-medium">G</span>round{' '}
-                  <span className="text-[#ff6c2c] font-medium">E</span>xplorer
-                </h3>
-              </div>
-
-              <div className="space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
-                <p>
-                  <strong className="font-medium text-white">M.I.R.A.G.E.</strong> is an advanced{' '}
-                  <strong className="font-medium text-white">military-grade UGV</strong> engineered for intelligent{' '}
-                  <strong className="font-medium text-white">landmine detection and classification</strong>.
-                </p>
-
-                <p>
-                  It employs <strong className="font-medium text-white">sensor fusion technology</strong>, combining data from
-                  multiple sensors and advanced radar systems to accurately identify buried threats in real time.
-                </p>
-
-                <p>
-                  Designed for reliability in challenging terrains, M.I.R.A.G.E enhances operational safety, precision, and
-                  efficiency in <strong className="font-medium text-white">demining missions</strong>.
-                </p>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  onClick={() => scrollToSection('technology')}
-                  className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
-                >
-                  <span>Explore technology capabilities</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+                <div className="text-[10px] sm:text-xs text-slate-300 font-medium tracking-wide truncate max-w-[130px] sm:max-w-none">
+                  Autonomous Telemetry Active
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Technology Section: Sleek 3-Card Bento Grid */}
+      {/* 5. Technology Section: Clean Light Bento Grid Section */}
       <section
         id="technology"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#0d121f] text-slate-100 overflow-hidden"
+        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 bg-slate-50 text-slate-900 overflow-hidden"
         aria-labelledby="technology-heading"
       >
         <div className="max-w-6xl mx-auto">
           <div className="space-y-2.5 sm:space-y-3 mb-8 sm:mb-12 lg:mb-16 text-center max-w-3xl mx-auto">
             <h2
               id="technology-heading"
-              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]"
+              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15]"
             >
-              Technology <span className="font-medium text-[#3b82f6]">Capabilities</span>
+              Technology <span className="font-semibold text-[#0051bb]">Capabilities</span>
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-300">
+            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-600">
               Advanced sub-surface sensing and autonomous robotics engineered to detect and classify explosive threats.
             </p>
           </div>
@@ -737,19 +826,18 @@ export default function App() {
               return (
                 <div
                   key={idx}
-                  onMouseMove={handleMouseMove}
-                  className="card-spotlight relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-3xl bg-[#111726]/85 backdrop-blur-sm border border-slate-800/80 hover:border-blue-500/40 shadow-xl hover:shadow-[0_0_35px_rgba(59,130,246,0.15)] transition-all duration-300 group hover:-translate-y-1.5 sm:hover:-translate-y-2 flex flex-col justify-between before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/50 before:to-transparent"
+                  className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-400/60 transition-all duration-300 group hover:-translate-y-1.5 sm:hover:-translate-y-2 flex flex-col justify-between"
                 >
                   <div>
-                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 sm:mb-6 text-[#3b82f6] group-hover:scale-110 group-hover:border-[#ff6c2c]/40 group-hover:text-[#ff6c2c] group-hover:bg-[#ff6c2c]/10 transition-all duration-300 shadow-md">
+                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4 sm:mb-6 text-[#0051bb] group-hover:scale-110 group-hover:border-orange-200 group-hover:text-[#ff6c2c] group-hover:bg-orange-50 transition-all duration-300 shadow-xs">
                       <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
 
-                    <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white leading-snug mb-2 sm:mb-3 group-hover:text-blue-100 transition-colors">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold tracking-tight text-slate-900 leading-snug mb-2 sm:mb-3 group-hover:text-[#0051bb] transition-colors">
                       {card.title}
                     </h3>
 
-                    <p className="text-xs sm:text-sm lg:text-base font-normal leading-relaxed text-slate-300">
+                    <p className="text-xs sm:text-sm lg:text-base font-normal leading-relaxed text-slate-600">
                       {card.description}
                     </p>
                   </div>
@@ -773,18 +861,10 @@ export default function App() {
         />
 
         <div className="relative mx-auto max-w-6xl">
-          <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-10 lg:mb-12">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#3b82f6]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3b82f6] animate-pulse" />
-              <span>Direct Engagement</span>
-            </div>
+          <div className="mb-6 sm:mb-10 lg:mb-12">
             <h2 id="contact-heading" className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]">
               Contact <span className="font-medium text-[#3b82f6]">Us</span>
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-300 max-w-3xl">
-              If you have any questions regarding our defense robotics systems, field deployments, or partnerships, please
-              fill out the form here.
-            </p>
           </div>
 
           <div
@@ -897,24 +977,18 @@ export default function App() {
               {/* Right Column (lg:col-span-5): Contact Information Cards */}
               <div className="lg:col-span-5 p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 bg-white/2 flex flex-col justify-between">
                 <div>
-                  <div className="space-y-1.5">
+                  <div>
                     <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white">Contact Info</h3>
-                    <p className="text-xs sm:text-sm font-normal text-slate-400 leading-relaxed">
-                      Official defense communications and corporate headquarters.
-                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-2.5 sm:gap-3.5 pt-3 sm:pt-4">
                     {/* Email */}
-                    <div className="group p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#090d16]/90 border border-slate-800/80 hover:border-blue-500/40 hover:bg-[#0c121e] transition-all flex items-start justify-between gap-3 sm:gap-3.5">
-                      <div className="flex items-start gap-3 sm:gap-3.5 min-w-0">
+                    <div className="group p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#090d16]/90 border border-slate-800/80 hover:border-blue-500/40 hover:bg-[#0c121e] transition-all flex items-center justify-between gap-3 sm:gap-3.5">
+                      <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
                         <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#3b82f6] group-hover:scale-105 group-hover:text-blue-400 transition-all shrink-0">
                           <Mail className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
-                            Email
-                          </div>
                           <a
                             href="mailto:info@husoro.com"
                             className="text-xs sm:text-sm font-medium text-[#3b82f6] hover:text-[#ff6c2c] hover:underline transition-colors break-all"
@@ -938,11 +1012,8 @@ export default function App() {
                       <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-orange-500/10 border border-orange-500/20 text-[#ff6c2c] group-hover:scale-105 group-hover:text-orange-400 transition-all shrink-0">
                         <MapPin className="w-4 h-4" />
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-[11px] sm:text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Address
-                        </div>
-                        <address className="not-italic text-xs sm:text-sm font-medium text-slate-200 mt-0.5 leading-relaxed break-words">
+                      <div className="min-w-0 flex-1">
+                        <address className="not-italic text-xs sm:text-sm font-medium text-slate-200 leading-relaxed break-words">
                           Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
                         </address>
                       </div>
@@ -955,13 +1026,13 @@ export default function App() {
         </div>
       </section>
 
-      {/* Footer: Clean Minimal Tactical Footer with Refined Dividers & Muted Social Pill Links */}
-      <footer className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800/80 bg-[#05070a] text-slate-400 text-xs">
+      {/* Footer: Clean Minimalist White Footer */}
+      <footer className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-200/90 bg-white text-slate-600 text-xs">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           {/* Logo & Brand Wordmark */}
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg overflow-hidden bg-black border border-white/20 shadow-sm shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg overflow-hidden bg-black border border-slate-200 shadow-xs shrink-0">
                 <img
                   src={BRAND_LOGO}
                   alt="HUSORO Technologies Logo"
@@ -972,49 +1043,48 @@ export default function App() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="font-bold text-white tracking-tight text-sm font-ubuntu">
+              <span className="font-bold text-slate-900 tracking-tight text-sm font-ubuntu">
                 HUSORO
               </span>
             </div>
-            <span className="hidden sm:inline text-slate-700">|</span>
-            <span className="text-slate-400 font-normal text-xs">
+            <span className="hidden sm:inline text-slate-300">|</span>
+            <span className="text-slate-500 font-normal text-xs">
               Incubated at iTIC Foundation, IIT Hyderabad
             </span>
           </div>
 
           {/* Quick Nav Mirror with touch-friendly spacing */}
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-6 font-medium text-xs sm:text-sm">
-            <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
+            <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Home
             </a>
-            <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
+            <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               About
             </a>
-            <a href="#product" onClick={(e) => { e.preventDefault(); scrollToSection('product'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
+            <a href="#product" onClick={(e) => { e.preventDefault(); scrollToSection('product'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Product
             </a>
-            <a href="#technology" onClick={(e) => { e.preventDefault(); scrollToSection('technology'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
+            <a href="#technology" onClick={(e) => { e.preventDefault(); scrollToSection('technology'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Technology
             </a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} className="p-1 text-slate-400 hover:text-white transition-colors">
+            <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Contact
             </a>
             <a
               href="https://www.linkedin.com/company/husoro-technologies/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-[#0077b5]/50 hover:bg-[#0077b5]/10 hover:text-white text-slate-300 transition-all text-xs font-medium"
+              className="inline-flex items-center justify-center p-2 rounded-full bg-slate-100 border border-slate-200 hover:border-[#0077b5]/50 hover:bg-[#0077b5]/10 text-slate-600 hover:text-[#0077b5] transition-all text-xs font-medium"
               aria-label="HUSORO Technologies LinkedIn"
               title="LinkedIn"
             >
               <LinkedInIcon className="w-3.5 h-3.5 text-[#0077b5]" />
-              <span>LinkedIn</span>
             </a>
           </div>
 
           {/* Clean Copyright */}
           <div>
-            <p className="font-normal text-slate-500 text-[11px] sm:text-xs">&copy; 2024–2026 HUSORO. All rights reserved.</p>
+            <p className="font-normal text-slate-500 text-[11px] sm:text-xs">&copy; 2024 HUSORO. All rights reserved.</p>
           </div>
         </div>
       </footer>
