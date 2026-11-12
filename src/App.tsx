@@ -17,6 +17,12 @@ import {
   Maximize,
   Minimize,
   Copy,
+  AlertTriangle,
+  Globe,
+  Compass,
+  Anchor,
+  Shield,
+  Award,
 } from 'lucide-react';
 
 const BRAND_LOGO = 'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
@@ -39,9 +45,12 @@ function LinkedInIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 const NAV_LINKS = [
   { id: 'home', label: 'Home' },
+  { id: 'landscape', label: 'Landscape' },
   { id: 'about', label: 'About' },
   { id: 'product', label: 'Product' },
   { id: 'technology', label: 'Technology' },
+  { id: 'team', label: 'Team' },
+  { id: 'maritime', label: 'Maritime' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -195,7 +204,7 @@ export default function App() {
   });
   const [whatsappRedirectUrl, setWhatsappRedirectUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitBtnText, setSubmitBtnText] = useState('Submit');
+  const [submitBtnText, setSubmitBtnText] = useState('Send Message');
 
   // Sync dark mode class on document & localStorage
   useEffect(() => {
@@ -215,7 +224,7 @@ export default function App() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
 
-      const sections = ['home', 'about', 'product', 'technology', 'contact'];
+      const sections = ['home', 'landscape', 'about', 'product', 'technology', 'team', 'maritime', 'contact'];
       const scrollPos = window.scrollY + 200;
 
       for (const sectionId of sections) {
@@ -344,22 +353,22 @@ export default function App() {
     setWhatsappRedirectUrl(null);
 
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      setFormStatus({ type: 'error', text: 'Please complete all required fields.' });
+      setFormStatus({ type: 'error', text: 'Please fill in your name, email, subject, and message.' });
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setFormStatus({ type: 'error', text: 'Please provide a valid official email address.' });
+      setFormStatus({ type: 'error', text: 'Please enter a valid email address.' });
       return;
     }
 
     setSubmitting(true);
-    setSubmitBtnText('Submitting...');
+    setSubmitBtnText('Sending...');
 
     // Format all inquiry fields for WhatsApp
     const whatsappText =
-      `*New Inquiry - HUSORO Technologies*\n\n` +
+      `*New Message - HUSORO Technologies*\n\n` +
       `*Name:* ${formData.name}\n` +
       `*Email:* ${formData.email}\n` +
       `*Phone:* ${formData.phone.trim() ? formData.phone : 'N/A'}\n` +
@@ -382,13 +391,13 @@ export default function App() {
 
     setFormStatus({
       type: 'success',
-      text: 'Redirecting to WhatsApp with your inquiry details pre-filled...',
+      text: 'Opening WhatsApp with your message ready...',
     });
 
     // Directly redirect to WhatsApp
     setTimeout(() => {
       window.location.href = targetUrl;
-      setSubmitBtnText('Submitted');
+      setSubmitBtnText('Message Sent');
       setSubmitting(false);
     }, 350);
   };
@@ -416,21 +425,21 @@ export default function App() {
     e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   };
 
-  // Authentic core technologies without artificial metrics or numbers
+  // Core technologies explained in plain, simple English
   const coreTechnologies = [
     {
-      title: 'Real-Time Landmine Detection',
-      description: 'Advanced radar systems engineered to detect buried explosive threats with high precision and sub-surface reliability.',
+      title: 'Radar That Sees Underground',
+      description: 'Scans beneath the soil to spot hidden plastic and metal landmines without touching them.',
       icon: Radar,
     },
     {
-      title: 'Sensor Fusion Technology',
-      description: 'Combines synchronized multi-sensor feeds and radar data to accurately identify buried hazards and minimize false positives.',
+      title: 'Smart Sensor Fusion',
+      description: 'Combines radar and sensors so the robot clearly identifies real threats and avoids false alarms from rocks or trash.',
       icon: Layers,
     },
     {
-      title: 'Dual-Mode Operation',
-      description: 'Flexible autonomous traversal and manual tele-operation modes designed for extreme and challenging multi-terrain environments.',
+      title: 'Drives Autonomously or by Remote',
+      description: 'Can drive itself across rocks, sand, and rough dirt, or be driven safely by an operator from a distance.',
       icon: Radio,
     },
   ];
@@ -478,7 +487,7 @@ export default function App() {
               </a>
 
               {/* Zone 2: Navigation Links Moved to the Left next to HUSORO */}
-              <nav className="hidden md:flex items-center gap-1 sm:gap-2 bg-transparent border-0 p-0">
+              <nav className="hidden md:flex items-center gap-0.5 lg:gap-1.5 bg-transparent border-0 p-0">
                 {NAV_LINKS.map((item) => {
                   const isActive = activeSection === item.id;
                   return (
@@ -489,7 +498,7 @@ export default function App() {
                         e.preventDefault();
                         scrollToSection(item.id);
                       }}
-                      className={`relative px-3.5 py-1.5 rounded-lg text-xs lg:text-sm font-semibold tracking-normal transition-all whitespace-nowrap shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] ${
+                      className={`relative px-2.5 lg:px-3 py-1.5 rounded-lg text-xs lg:text-sm font-semibold tracking-normal transition-all whitespace-nowrap shrink-0 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] ${
                         isScrolled
                           ? isActive
                             ? 'bg-amber-400/20 text-[#ffd285] shadow-xs border border-amber-400/30 backdrop-blur-xs'
@@ -555,7 +564,7 @@ export default function App() {
       {/* 2. Hero Section: Cinematic Flexible Sentence Rover Background */}
       <section
         id="home"
-        className="relative min-h-[58vh] sm:min-h-[72vh] lg:min-h-[85vh] flex items-center justify-center pt-20 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-3.5 sm:px-6 lg:px-8 overflow-hidden"
+        className="relative min-h-[52vh] sm:min-h-[64vh] lg:min-h-[72vh] flex items-center justify-center pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-12 md:pb-14 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 overflow-hidden"
       >
         {/* MND-X1 Desert Scanning Rover Background Image with Atmospheric Lighting */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -600,223 +609,387 @@ export default function App() {
         {/* Subtle Canvas Radar Grid Background */}
         <RadarCanvas darkMode={true} />
 
-        <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center justify-center">
-          <div className="filter drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)]">
-            <h1 className="font-ubuntu text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight uppercase text-center max-w-5xl mx-auto px-3 sm:px-6 bg-gradient-to-r from-amber-100 via-[#ffd285] to-[#ff8c42] bg-clip-text text-transparent">
-              ROBOTS DESIGNED TO SAVE, PROTECT, &amp; SERVE
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center md:justify-end">
+          <div className="w-full md:max-w-xl lg:max-w-2xl text-center md:text-left filter drop-shadow-[0_10px_35px_rgba(0,0,0,0.95)]">
+            <h1 className="font-ubuntu text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none uppercase bg-gradient-to-r from-amber-100 via-[#ffd285] to-[#ff8c42] bg-clip-text text-transparent mb-2 sm:mb-3">
+              ROBOTS
             </h1>
+            <p className="font-ubuntu text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight uppercase text-amber-100/95 leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+              DESIGNED TO SAVE, PROTECT, &amp; SERVE
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 3. About Us Section: Clean High-Contrast Light Section */}
+      {/* 2. Operational Landscape Section: Alternating Zig-Zag (Stats Left, Comparison Right) */}
+      <section
+        id="landscape"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200/90 bg-white text-slate-900 overflow-hidden"
+        aria-labelledby="landscape-heading"
+      >
+        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
+          {/* Section Header */}
+          <div className="space-y-2.5 sm:space-y-3 text-center max-w-3xl mx-auto">
+            <h2
+              id="landscape-heading"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight"
+            >
+              The Problem We <span className="text-[#0051bb]">Solve</span>
+            </h2>
+            <p className="text-sm sm:text-base font-normal leading-relaxed text-slate-600 max-w-2xl mx-auto">
+              Hidden landmines put thousands of innocent lives in danger every day. Our robots find them so people don't have to.
+            </p>
+          </div>
+
+          {/* 2-Column Zig-Zag: Threat Stats (Left) & Method Comparison (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            {/* Left Column: 3 Real-World Threat Data Cards with 21st.dev hairline borders */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
+              <div className="relative p-5 sm:p-6 rounded-2xl bg-slate-50/90 border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-rose-500/50 before:to-transparent">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-rose-600">Human Toll</span>
+                  <AlertTriangle className="w-4 h-4 text-rose-500" />
+                </div>
+                <div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-ubuntu tracking-tight tabular-nums">
+                    6,279
+                  </div>
+                  <div className="text-xs font-semibold text-slate-700 mt-1">Over 6,000 People Injured Yearly</div>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    90% of all victims are everyday civilians, and nearly half of them are children walking or playing outside.
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative p-5 sm:p-6 rounded-2xl bg-slate-50/90 border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#0051bb]/50 before:to-transparent">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#0051bb]">Global Danger</span>
+                  <Globe className="w-4 h-4 text-[#0051bb]" />
+                </div>
+                <div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-ubuntu tracking-tight tabular-nums">
+                    57
+                  </div>
+                  <div className="text-xs font-semibold text-slate-700 mt-1">57 Countries Still Contaminated</div>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Thousands of fertile farmlands and village paths remain too dangerous for families and farmers to walk on.
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative p-5 sm:p-6 rounded-2xl bg-slate-50/90 border border-slate-200/90 shadow-xs flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-amber-500/50 before:to-transparent">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-amber-600">Danger in India</span>
+                  <Compass className="w-4 h-4 text-amber-500" />
+                </div>
+                <div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-ubuntu tracking-tight tabular-nums">
+                    1,300+
+                  </div>
+                  <div className="text-xs font-semibold text-slate-700 mt-1">1,300+ Hidden Explosives in India</div>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Buried explosives along borders and remote pathways still threaten soldiers, patrols, and local residents.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Comparative Clearance Methods Stack */}
+            <div className="lg:col-span-7 flex flex-col justify-between gap-3.5 sm:gap-4">
+              {/* Method 1: Manual */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50/70 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-slate-500">Traditional Method</span>
+                    <span className="text-xs font-semibold text-slate-600 tabular-nums">~200 m²/day</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1.5">Manual Clearance</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    People walking slowly with handheld metal detectors. It is painfully slow, stressful, and puts human lives right next to the blast.
+                  </p>
+                </div>
+                <div className="mt-3.5 pt-2.5 border-t border-slate-200/70 flex items-center gap-1.5 text-xs text-rose-600 font-medium">
+                  <span>High danger to human life · Painfully slow</span>
+                </div>
+              </div>
+
+              {/* Method 2: Mechanical */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-slate-50/70 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-slate-500">Heavy Machinery</span>
+                    <span className="text-xs font-semibold text-slate-600 tabular-nums">1,000–5,000+ m²/day</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1.5">Heavy Mechanical Rollers</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Tanks and heavy flails that crush the ground fast. They tear up good soil and cannot tell the difference between ordinary rocks and real bombs.
+                  </p>
+                </div>
+                <div className="mt-3.5 pt-2.5 border-t border-slate-200/70 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                  <span>Destroys farmland · Cannot identify targets</span>
+                </div>
+              </div>
+
+              {/* Method 3: HUSORO M.I.R.A.G.E. */}
+              <div className="relative p-5 sm:p-6 rounded-2xl bg-blue-50/80 border-2 border-[#0051bb]/40 shadow-sm flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#0051bb]/60 before:to-transparent">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#0051bb]/10 rounded-full blur-2xl pointer-events-none" />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-[#0051bb]">HUSORO Solution</span>
+                    <span className="text-xs font-bold text-[#0051bb]">Smart &amp; Safe</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-1.5">M.I.R.A.G.E. Robot</h3>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                    Our smart robotic rover scans deep underground with radar. It spots and classifies buried bombs automatically while keeping human workers safely away.
+                  </p>
+                </div>
+                <div className="mt-3.5 pt-2.5 border-t border-blue-200/70 flex items-center gap-1.5 text-xs text-[#0051bb] font-semibold">
+                  <Check className="w-3.5 h-3.5 text-[#0051bb]" />
+                  <span>Self-driving · Spots real bombs · Zero human risk</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. About Us Section: Alternating Zig-Zag (Story Left, Glass Card Right) */}
       <section
         id="about"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-t border-b border-slate-200/80 bg-white text-slate-900 overflow-hidden"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-white overflow-hidden"
         aria-labelledby="about-heading"
       >
         {/* Subtle background ambient radial glow */}
         <div
-          className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-blue-500/5 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"
+          className="absolute -top-32 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-blue-500/10 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto max-w-4xl">
-          <div className="space-y-5 sm:space-y-6">
-            <div>
-              <h2
-                id="about-heading"
-                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15]"
-              >
-                About <span className="font-semibold text-[#0051bb]">HUSORO</span>
-              </h2>
+        <div className="relative mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Mission & Origin Narrative */}
+            <div className="lg:col-span-6 space-y-4">
+              <div>
+                <h2
+                  id="about-heading"
+                  className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight"
+                >
+                  About <span className="text-[#3b82f6]">HUSORO</span>
+                </h2>
+              </div>
+
+              <div className="space-y-3.5 text-sm sm:text-base font-normal leading-relaxed text-slate-300">
+                <p>
+                  Founded in 2024 at IIT Hyderabad, <strong className="font-semibold text-white">HUSORO Technologies</strong> builds
+                  robots to protect human lives. We design smart ground vehicles that take on dangerous missions so humans don't have to.
+                </p>
+
+                <p>
+                  We build machines that can drive themselves and &ldquo;see&rdquo; underground, keeping soldiers, humanitarian workers, and local communities safe from hidden dangers.
+                </p>
+
+                <p>
+                  Our goal is simple: create dependable robots that take on hazardous work so people can stay safe and return home to their families.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-3.5 sm:space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-600">
-              <p>
-                Established in 2024, <strong className="font-semibold text-slate-900">HUSORO Technologies</strong> is
-                a deep-tech company dedicated to advancing the field of unmanned robotics. Our mission is to protect human lives and
-                transform critical operations through intelligent, reliable, and purpose-driven robotic systems.
-              </p>
+            {/* Right Column: 21st.dev Frosted Glass Core Pillar Card */}
+            <div className="lg:col-span-6">
+              <div
+                onMouseMove={handleMouseMove}
+                className="card-spotlight relative rounded-2xl sm:rounded-3xl bg-[#0d121f]/90 backdrop-blur-xl border border-slate-800/90 p-6 sm:p-8 shadow-xl overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/40 before:to-transparent"
+              >
+                <div className="space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+                  <p>
+                    Built through our own in-house research, HUSORO brings together{' '}
+                    <strong className="font-semibold text-white">smart software, self-driving navigation, and radar vision</strong> to
+                    make robotics simple, dependable, and safe in the real world.
+                  </p>
+                </div>
 
-              <p>
-                Built on a strong foundation of in-house research and development, HUSORO combines expertise in{' '}
-                <strong className="font-semibold text-slate-900">AI, autonomy, and advanced sensing</strong> to deliver
-                technologies that are both robust and future-ready.
-              </p>
-
-              <p>
-                With a clear focus on innovation, precision, and real-world impact, HUSORO is shaping the next generation of robotic
-                solutions where technology serves humanity with trust, adaptability, and purpose.
-              </p>
+                <div className="grid grid-cols-3 gap-2.5 pt-5 mt-5 border-t border-slate-800/80 text-center">
+                  <div className="p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/15">
+                    <div className="text-xs font-semibold text-blue-400">Smart AI</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">Spots Bombs</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/15">
+                    <div className="text-xs font-semibold text-orange-400">Self-Driving</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">Safe Route</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-cyan-500/5 border border-cyan-500/15">
+                    <div className="text-xs font-semibold text-cyan-400">Radar Vision</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">Sees Underground</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Product Section: Interactive Video Showcase Card & Narrative */}
+      {/* 4. Product Section: Alternating Zig-Zag (Video Left, Product Specs Right) */}
       <section
         id="product"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-[#07090e] text-white border-b border-slate-800/80 overflow-hidden"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 text-slate-900 border-b border-slate-200/90 overflow-hidden"
         aria-labelledby="product-heading"
       >
         <div
-          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-120 sm:w-175 h-90 sm:h-125 bg-[#ff6c2c]/10 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none"
+          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-120 sm:w-175 h-90 sm:h-125 bg-[#ff6c2c]/5 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="relative max-w-5xl mx-auto space-y-8 sm:space-y-12">
-          {/* Top: Product Narrative & Acronym Breakdown (Above Video on Desktop & Mobile) */}
-          <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-5">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#ff6c2c]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ff6c2c]" />
-              <span>Flagship Defense Robotics</span>
-            </div>
-            <h2 id="product-heading" className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.15]">
-              Product <span className="font-medium text-[#ff6c2c]">M.I.R.A.G.E.</span>
-            </h2>
-
-            <h3 className="text-base sm:text-lg font-normal text-slate-300 tracking-tight">
-              <span className="text-[#ff6c2c] font-medium">M</span>inefield{' '}
-              <span className="text-[#ff6c2c] font-medium">I</span>ntelligent{' '}
-              <span className="text-[#ff6c2c] font-medium">R</span>adar and{' '}
-              <span className="text-[#ff6c2c] font-medium">A</span>utonomous{' '}
-              <span className="text-[#ff6c2c] font-medium">G</span>round{' '}
-              <span className="text-[#ff6c2c] font-medium">E</span>xplorer
-            </h3>
-
-            <div className="space-y-3.5 text-sm sm:text-base font-normal leading-relaxed text-slate-300 max-w-2xl mx-auto">
-              <p>
-                <strong className="font-medium text-white">M.I.R.A.G.E.</strong> is an advanced{' '}
-                <strong className="font-medium text-white">military-grade UGV</strong> engineered for intelligent{' '}
-                <strong className="font-medium text-white">landmine detection and classification</strong>.
-              </p>
-
-              <p>
-                It employs <strong className="font-medium text-white">sensor fusion technology</strong>, combining data from
-                multiple sensors and advanced radar systems to accurately identify buried threats in real time.
-              </p>
-
-              <p>
-                Designed for reliability in challenging terrains, M.I.R.A.G.E enhances operational safety, precision, and
-                efficiency in <strong className="font-medium text-white">demining missions</strong>.
-              </p>
-            </div>
-
-            <div className="pt-2">
-              <button
-                onClick={() => scrollToSection('technology')}
-                className="group inline-flex items-center gap-2 text-sm font-medium text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
+        <div className="relative max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Full-Width Cinematic Video Showcase Card */}
+            <div className="lg:col-span-7 w-full">
+              <div
+                ref={videoContainerRef}
+                className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-black/95 border border-white/15 shadow-[0_0_70px_rgba(255,108,44,0.22)] aspect-video w-full group before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent [&:fullscreen]:rounded-none [&:fullscreen]:border-0 [&:fullscreen]:shadow-none [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:flex [&:fullscreen]:items-center [&:fullscreen]:justify-center [&:fullscreen]:bg-black"
               >
-                <span>Explore technology capabilities</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
+                {/* Top Feature Pill Badges */}
+                <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between pointer-events-none z-10 gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-slate-200 shadow-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Camera Feed
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-orange-400 shadow-md">
+                    <Radar className="w-3 h-3 text-orange-400" />
+                    M.I.R.A.G.E. Rover
+                  </span>
+                </div>
 
-          {/* Bottom: Full-Width Cinematic Video Showcase Card (Responsive Cinema Display) */}
-          <div className="w-full">
-            <div
-              ref={videoContainerRef}
-              className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-black/95 border border-white/15 shadow-[0_0_70px_rgba(255,108,44,0.22)] aspect-video w-full group before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent [&:fullscreen]:rounded-none [&:fullscreen]:border-0 [&:fullscreen]:shadow-none [&:fullscreen]:w-screen [&:fullscreen]:h-screen [&:fullscreen]:flex [&:fullscreen]:items-center [&:fullscreen]:justify-center [&:fullscreen]:bg-black"
-            >
-              {/* Top Feature Pill Badges */}
-              <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between pointer-events-none z-10 gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-slate-200 shadow-md">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  4K Real-Time Feed
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-medium text-orange-400 shadow-md">
-                  <Radar className="w-3 h-3 text-orange-400" />
-                  M.I.R.A.G.E. UGV
-                </span>
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover group-[:fullscreen]:object-contain"
+                  autoPlay
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-label="M.I.R.A.G.E. product demonstration video"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                >
+                  <source
+                    src="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
+                    type="video/mp4"
+                  />
+                  <source src="/intro_video.mp4" type="video/mp4" />
+                  <p>
+                    Your browser does not support the video tag.{' '}
+                    <a
+                      href="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline text-[#ff6c2c]"
+                    >
+                      Download video
+                    </a>
+                    .
+                  </p>
+                </video>
+
+                {/* Bottom Video Controls Overlay Pill with 40px touch targets */}
+                <div className="absolute bottom-2.5 sm:bottom-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between bg-black/75 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-white/15 shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={togglePlay}
+                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                      aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </button>
+
+                    <button
+                      onClick={toggleMute}
+                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                      aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                    >
+                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+
+                    <button
+                      onClick={toggleFullscreen}
+                      className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
+                      aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                      title={isFullscreen ? 'Exit fullscreen' : 'Full screen'}
+                    >
+                      {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  <div className="text-[10px] sm:text-xs text-slate-300 font-medium tracking-wide truncate max-w-[130px] sm:max-w-none">
+                    Self-Driving Rover Active
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Product Narrative & Acronym Breakdown */}
+            <div className="lg:col-span-5 space-y-3.5 sm:space-y-4 text-left">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#ff6c2c]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6c2c]" />
+                <span>Flagship Landmine-Finding Rover</span>
               </div>
 
-              <video
-                ref={videoRef}
-                className="w-full h-full object-cover group-[:fullscreen]:object-contain"
-                autoPlay
-                muted={isMuted}
-                loop
-                playsInline
-                preload="auto"
-                aria-label="M.I.R.A.G.E. product demonstration video"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-              >
-                <source
-                  src="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
-                  type="video/mp4"
-                />
-                <source src="/intro_video.mp4" type="video/mp4" />
+              <h2 id="product-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
+                Product <span className="text-[#ff6c2c]">M.I.R.A.G.E.</span>
+              </h2>
+
+              <h3 className="text-sm sm:text-base font-medium text-slate-700 tracking-tight">
+                <span className="text-[#ff6c2c] font-medium">M</span>inefield{' '}
+                <span className="text-[#ff6c2c] font-medium">I</span>ntelligent{' '}
+                <span className="text-[#ff6c2c] font-medium">R</span>adar and{' '}
+                <span className="text-[#ff6c2c] font-medium">A</span>utonomous{' '}
+                <span className="text-[#ff6c2c] font-medium">G</span>round{' '}
+                <span className="text-[#ff6c2c] font-medium">E</span>xplorer
+              </h3>
+
+              <div className="space-y-3 text-sm sm:text-base font-normal leading-relaxed text-slate-600">
                 <p>
-                  Your browser does not support the video tag.{' '}
-                  <a
-                    href="https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline text-[#ff6c2c]"
-                  >
-                    Download video
-                  </a>
-                  .
+                  <strong className="font-semibold text-slate-900">M.I.R.A.G.E.</strong> is our flagship robotic rover built to search dangerous ground and find buried landmines safely.
                 </p>
-              </video>
 
-              {/* Bottom Video Controls Overlay Pill with 40px touch targets */}
-              <div className="absolute bottom-2.5 sm:bottom-3.5 inset-x-2.5 sm:inset-x-3.5 flex items-center justify-between bg-black/75 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-white/15 shadow-2xl opacity-90 group-hover:opacity-100 transition-opacity">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={togglePlay}
-                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-                    aria-label={isPlaying ? 'Pause video' : 'Play video'}
-                  >
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </button>
+                <p>
+                  It uses special ground-penetrating radar to detect underground explosives in real time and does not get tricked by rocks, scrap metal, or tree roots.
+                </p>
 
-                  <button
-                    onClick={toggleMute}
-                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-                  >
-                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
+                <p>
+                  Built tough to roll over rocky dirt, mud, and sand, M.I.R.A.G.E. clears the way so soldiers, humanitarian workers, and local communities stay completely safe.
+                </p>
+              </div>
 
-                  <button
-                    onClick={toggleFullscreen}
-                    className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-white/10 hover:bg-white/20 active:bg-white/30 text-white transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                    title={isFullscreen ? 'Exit fullscreen' : 'Full screen'}
-                  >
-                    {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                <div className="text-[10px] sm:text-xs text-slate-300 font-medium tracking-wide truncate max-w-[130px] sm:max-w-none">
-                  Autonomous Telemetry Active
-                </div>
+              <div className="pt-1.5">
+                <button
+                  onClick={() => scrollToSection('technology')}
+                  className="group inline-flex items-center gap-2 text-sm font-semibold text-[#ff6c2c] hover:text-[#ff8042] transition-colors cursor-pointer"
+                >
+                  <span>See how the technology works</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Technology Section: Clean Light Bento Grid Section */}
+      {/* 5. Technology Section: Trending Asymmetric 21st.dev Bento Grid */}
       <section
         id="technology"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 bg-slate-50 text-slate-900 overflow-hidden"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-white overflow-hidden"
         aria-labelledby="technology-heading"
       >
-        <div className="max-w-6xl mx-auto">
-          <div className="space-y-2.5 sm:space-y-3 mb-8 sm:mb-12 lg:mb-16 text-center max-w-3xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+          <div className="space-y-2.5 sm:space-y-3 text-center max-w-3xl mx-auto">
             <h2
               id="technology-heading"
-              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15]"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight"
             >
-              Technology <span className="font-semibold text-[#0051bb]">Capabilities</span>
+              Technology <span className="text-[#3b82f6]">Capabilities</span>
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg font-normal leading-relaxed text-slate-600">
-              Advanced sub-surface sensing and autonomous robotics engineered to detect and classify explosive threats.
+            <p className="text-sm sm:text-base font-normal leading-relaxed text-slate-300 max-w-2xl mx-auto">
+              Smart sensors and self-driving robots built to find hidden explosives and protect lives.
             </p>
           </div>
 
@@ -826,18 +999,19 @@ export default function App() {
               return (
                 <div
                   key={idx}
-                  className="relative p-5 sm:p-7 lg:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-400/60 transition-all duration-300 group hover:-translate-y-1.5 sm:hover:-translate-y-2 flex flex-col justify-between"
+                  onMouseMove={handleMouseMove}
+                  className="card-spotlight relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#0d121f]/90 backdrop-blur-xl border border-slate-800/90 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all duration-300 group hover:-translate-y-1 sm:hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#3b82f6]/40 before:to-transparent"
                 >
                   <div>
-                    <div className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4 sm:mb-6 text-[#0051bb] group-hover:scale-110 group-hover:border-orange-200 group-hover:text-[#ff6c2c] group-hover:bg-orange-50 transition-all duration-300 shadow-xs">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5 text-[#3b82f6] group-hover:scale-110 group-hover:border-orange-500/40 group-hover:text-[#ff6c2c] group-hover:bg-orange-500/10 transition-all duration-300 shadow-xs">
                       <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
 
-                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold tracking-tight text-slate-900 leading-snug mb-2 sm:mb-3 group-hover:text-[#0051bb] transition-colors">
+                    <h3 className="text-base sm:text-lg lg:text-xl font-bold tracking-tight text-white leading-snug mb-2 group-hover:text-[#3b82f6] transition-colors">
                       {card.title}
                     </h3>
 
-                    <p className="text-xs sm:text-sm lg:text-base font-normal leading-relaxed text-slate-600">
+                    <p className="text-xs sm:text-sm lg:text-base font-normal leading-relaxed text-slate-400">
                       {card.description}
                     </p>
                   </div>
@@ -848,10 +1022,195 @@ export default function App() {
         </div>
       </section>
 
+      {/* 6. Leadership & Advisors Section: Alternating Zig-Zag (Founders Left, Advisors Right) */}
+      <section
+        id="team"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200/90 bg-white text-slate-900 overflow-hidden"
+        aria-labelledby="team-heading"
+      >
+        <div className="max-w-6xl mx-auto space-y-8 sm:space-y-10">
+          {/* Header */}
+          <div className="space-y-2.5 sm:space-y-3 text-center max-w-3xl mx-auto">
+            <h2
+              id="team-heading"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 leading-tight"
+            >
+              Leadership &amp; <span className="text-[#0051bb]">Advisors</span>
+            </h2>
+            <p className="text-sm sm:text-base font-normal leading-relaxed text-slate-600 max-w-2xl mx-auto">
+              Engineers, roboticists, and defense veterans working together to protect lives.
+            </p>
+          </div>
+
+          {/* 2-Column Zig-Zag: Co-Founders (Left) & Strategic Advisors (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+            {/* Left Column: Co-Founders Cards with 21st.dev hairline borders */}
+            <div className="lg:col-span-6 flex flex-col justify-between gap-4">
+              {/* Kiran Teja Ambati */}
+              <div className="relative p-6 sm:p-7 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 hover:border-blue-400/50 hover:shadow-lg transition-all flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#0051bb]/40 before:to-transparent">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-[#0051bb] font-ubuntu font-bold text-sm flex items-center justify-center">
+                      KT
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-100/60 text-[#0051bb]">
+                      Founder &amp; CEO
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Kiran Teja Ambati</h3>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 mb-2.5">
+                    M.Tech in Design Engineering · BITS Pilani
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Leads the company and designs our robotic systems with a strong focus on practical, real-world safety.
+                  </p>
+                </div>
+              </div>
+
+              {/* Varun Vivek Vennavalli */}
+              <div className="relative p-6 sm:p-7 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 hover:border-blue-400/50 hover:shadow-lg transition-all flex flex-col justify-between overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-[#ff6c2c]/40 before:to-transparent">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-orange-50 border border-orange-100 text-[#ff6c2c] font-ubuntu font-bold text-sm flex items-center justify-center">
+                      VV
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-orange-100/60 text-[#ff6c2c]">
+                      Co-Founder &amp; CTO
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Varun Vivek Vennavalli</h3>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 mb-2.5">
+                    MS in Robotics · Rochester Institute of Technology, NY
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Writes the software, self-driving navigation systems, and smart sensor code that guide our robots.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Strategic Advisory Board Card */}
+            <div className="lg:col-span-6 flex flex-col justify-between">
+              <div className="h-full p-6 sm:p-7 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between relative overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-blue-500/40 before:to-transparent">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-[#0051bb]" />
+                    <span>Strategic Advisory Board</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
+                      <div className="font-bold text-slate-900 text-sm sm:text-base">Wg Cdr (Retd.) R Murali Krishna</div>
+                      <div className="text-xs text-[#0051bb] font-semibold mt-0.5">Defense &amp; Operations Advisor</div>
+                      <div className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                        Retired military aviation veteran who helps ensure our robots meet real-world defense needs and safety standards.
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs">
+                      <div className="font-bold text-slate-900 text-sm sm:text-base">Pradeep Tanuku, CA</div>
+                      <div className="text-xs text-[#0051bb] font-semibold mt-0.5">Finance &amp; Business Advisor</div>
+                      <div className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                        Senior corporate finance leader guiding our company planning, growth, and business operations.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3.5 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-500">
+                  <span>Incubation Partner</span>
+                  <span className="font-medium text-slate-700">iTIC Foundation, IIT Hyderabad</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Maritime Robotics Division: Alternating Zig-Zag (Intro Left, Pillars Card Right) */}
+      <section
+        id="maritime"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-white overflow-hidden"
+        aria-labelledby="maritime-heading"
+      >
+        <div
+          className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="relative max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Mission & Status Overview */}
+            <div className="lg:col-span-5 space-y-3.5 sm:space-y-4 text-left">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                <Anchor className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Coming Soon · Underwater Cleaning Robot</span>
+              </div>
+
+              <h2
+                id="maritime-heading"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight"
+              >
+                Husoro <span className="text-cyan-400">Maritime</span>
+              </h2>
+
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Underwater Robot Preview</span>
+                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Project ORCA</h3>
+                <p className="text-xs text-slate-400">
+                  Offshore ROV for Cleaning and Assessment
+                </p>
+              </div>
+
+              <p className="text-sm sm:text-base font-normal leading-relaxed text-slate-300">
+                Sea plants, algae, and barnacles stick to ship hulls, slowing them down and causing them to burn up to 40% more fuel. Project ORCA is our upcoming underwater robot designed to clean ship hulls safely without taking ships out of the water.
+              </p>
+
+              <div className="pt-1">
+                <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
+                  In Active Development · IIT Hyderabad
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: 21st.dev Frosted Glass Pillars Container */}
+            <div className="lg:col-span-7">
+              <div
+                onMouseMove={handleMouseMove}
+                className="card-spotlight relative rounded-2xl sm:rounded-3xl bg-[#0d1424]/90 backdrop-blur-xl border border-slate-800/90 p-6 sm:p-7 shadow-xl overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-linear-to-r before:from-transparent before:via-cyan-400/40 before:to-transparent"
+              >
+                <div className="space-y-3.5">
+                  <div className="p-4 rounded-xl bg-black/40 border border-slate-800/70">
+                    <div className="text-xs font-semibold text-cyan-300 mb-1">Gentle Water-Pressure Cleaning</div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Uses gentle water pressure to wash away stubborn sea growth without scratching or damaging the ship&apos;s protective paint.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-black/40 border border-slate-800/70">
+                    <div className="text-xs font-semibold text-cyan-300 mb-1">Catches All Ocean Waste</div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Collects 100% of the cleaned sea growth inside the robot so no dirty debris or foreign species pollute the ocean water.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-black/40 border border-slate-800/70">
+                    <div className="text-xs font-semibold text-cyan-300 mb-1">Saves Huge Amounts of Fuel</div>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      A smooth, clean ship hull slides easily through water, cutting fuel waste by up to 40% and lowering harmful carbon smoke.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 6. Contact Section: 21st.dev Floating Dark Glass Form & Details Architecture */}
       <section
         id="contact"
-        className="relative py-12 sm:py-20 lg:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-slate-100 overflow-hidden"
+        className="relative py-10 sm:py-14 lg:py-16 px-4 sm:px-6 lg:px-8 border-b border-slate-800/80 bg-[#07090e] text-slate-100 overflow-hidden"
         aria-labelledby="contact-heading"
       >
         {/* Subtle Ambient Radial Glow Container */}
@@ -861,9 +1220,9 @@ export default function App() {
         />
 
         <div className="relative mx-auto max-w-6xl">
-          <div className="mb-6 sm:mb-10 lg:mb-12">
-            <h2 id="contact-heading" className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white leading-[1.18] sm:leading-[1.15]">
-              Contact <span className="font-medium text-[#3b82f6]">Us</span>
+          <div className="mb-6 sm:mb-8">
+            <h2 id="contact-heading" className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+              Contact <span className="text-[#3b82f6]">Us</span>
             </h2>
           </div>
 
@@ -919,7 +1278,7 @@ export default function App() {
                       <input
                         type="email"
                         required
-                        placeholder="name@organization.com"
+                        placeholder="your.email@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
@@ -929,9 +1288,10 @@ export default function App() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-slate-300">Phone</label>
+                      <label className="text-xs font-medium text-slate-300">Phone (Optional)</label>
                       <input
                         type="tel"
+                        placeholder="Your phone number"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
@@ -943,7 +1303,7 @@ export default function App() {
                       <input
                         type="text"
                         required
-                        placeholder="Inquiry or deployment focus"
+                        placeholder="What would you like to discuss?"
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                         className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none"
@@ -956,7 +1316,7 @@ export default function App() {
                     <textarea
                       rows={4}
                       required
-                      placeholder="Please describe your operational requirements or question..."
+                      placeholder="Tell us about your project, questions, or how we can help..."
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className="w-full px-3.5 py-3 sm:px-4 sm:py-3 rounded-xl bg-[#080c14]/90 border border-slate-700/60 hover:border-slate-600 focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/25 text-white text-base sm:text-sm placeholder:text-slate-500 transition-all outline-none resize-none"
@@ -978,7 +1338,7 @@ export default function App() {
               <div className="lg:col-span-5 p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 bg-white/2 flex flex-col justify-between">
                 <div>
                   <div>
-                    <h3 className="text-base sm:text-lg lg:text-xl font-medium tracking-tight text-white">Contact Info</h3>
+                    <h3 className="text-base sm:text-lg font-bold tracking-tight text-white">Get in Touch</h3>
                   </div>
 
                   <div className="grid grid-cols-1 gap-2.5 sm:gap-3.5 pt-3 sm:pt-4">
@@ -989,6 +1349,7 @@ export default function App() {
                           <Mail className="w-4 h-4" />
                         </div>
                         <div className="min-w-0">
+                          <div className="text-[11px] text-slate-400 font-medium">Send us an email anytime</div>
                           <a
                             href="mailto:info@husoro.com"
                             className="text-xs sm:text-sm font-medium text-[#3b82f6] hover:text-[#ff6c2c] hover:underline transition-colors break-all"
@@ -1013,6 +1374,7 @@ export default function App() {
                         <MapPin className="w-4 h-4" />
                       </div>
                       <div className="min-w-0 flex-1">
+                        <div className="text-[11px] text-slate-400 font-medium mb-0.5">Visit our lab at IIT Hyderabad</div>
                         <address className="not-italic text-xs sm:text-sm font-medium text-slate-200 leading-relaxed break-words">
                           Technology Innovation Park, IIT HYDERABAD, Kandi, Sangareddy, Telangana, India - 502284
                         </address>
@@ -1027,7 +1389,7 @@ export default function App() {
       </section>
 
       {/* Footer: Clean Minimalist White Footer */}
-      <footer className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-200/90 bg-white text-slate-600 text-xs">
+      <footer className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 border-t border-slate-200/90 bg-white text-slate-600 text-xs">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           {/* Logo & Brand Wordmark */}
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
@@ -1054,9 +1416,12 @@ export default function App() {
           </div>
 
           {/* Quick Nav Mirror with touch-friendly spacing */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-6 font-medium text-xs sm:text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2.5 sm:gap-5 font-medium text-xs sm:text-sm">
             <a href="#home" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Home
+            </a>
+            <a href="#landscape" onClick={(e) => { e.preventDefault(); scrollToSection('landscape'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
+              Landscape
             </a>
             <a href="#about" onClick={(e) => { e.preventDefault(); scrollToSection('about'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               About
@@ -1066,6 +1431,12 @@ export default function App() {
             </a>
             <a href="#technology" onClick={(e) => { e.preventDefault(); scrollToSection('technology'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Technology
+            </a>
+            <a href="#team" onClick={(e) => { e.preventDefault(); scrollToSection('team'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
+              Team
+            </a>
+            <a href="#maritime" onClick={(e) => { e.preventDefault(); scrollToSection('maritime'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
+              Maritime
             </a>
             <a href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection('contact'); }} className="p-1 text-slate-600 hover:text-slate-900 transition-colors">
               Contact
