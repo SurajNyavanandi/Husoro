@@ -611,7 +611,7 @@ export default function App() {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto max-w-4xl text-center space-y-4">
+        <div className="relative mx-auto max-w-4xl text-center space-y-4 sm:space-y-6">
           <h2
             id="about-heading"
             className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight"
@@ -619,18 +619,21 @@ export default function App() {
             About <span className="text-[#3b82f6]">HUSORO</span>
           </h2>
 
-          <div className="space-y-3.5 text-sm sm:text-base font-normal leading-relaxed text-slate-300 max-w-3xl mx-auto">
+          <div className="space-y-4 text-sm sm:text-base font-normal leading-relaxed text-slate-300 max-w-3xl mx-auto">
             <p>
-              Founded in 2024 at IIT Hyderabad, <strong className="font-semibold text-white">HUSORO Technologies</strong> builds
-              robots to protect human lives. We design smart ground vehicles that take on dangerous missions so humans don't have to.
+              <strong className="font-semibold text-white">Husoro Technologies</strong> is a deep-tech robotics company building autonomous ground vehicles for defense and high-risk operations.
             </p>
 
             <p>
-              We build machines that can drive themselves and &ldquo;see&rdquo; underground, keeping soldiers, humanitarian workers, and local communities safe from hidden dangers.
+              We develop the full stack — mobility, perception, AI, and intelligent sensing — to deploy where human presence is dangerous, inefficient, or impossible.
             </p>
 
             <p>
-              Our goal is simple: create dependable robots that take on hazardous work so people can stay safe and return home to their families.
+              Our first platform, <strong className="font-semibold text-white">M.I.R.A.G.E.</strong>, targets landmine and UXO detection. It is the first of a portfolio of purpose-built UGVs Husoro is developing for real-world defence and critical-use applications.
+            </p>
+
+            <p className="text-slate-200">
+              Incubated at <span className="text-[#3b82f6] font-medium">iTIC–TiHAN, IIT Hyderabad</span>, we are developing robotics from India for challenges that matter globally.
             </p>
           </div>
         </div>
