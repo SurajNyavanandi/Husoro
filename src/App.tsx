@@ -28,7 +28,7 @@ import {
 const BRAND_LOGO =
   'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
 const HERO_IMAGE =
-  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794889391/Dusty_Desert_Reconnaissance_Rover_tzbdpi.jpg';
+  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_in_the_Golden_Desert_foacih.png';
 const VIDEO_URL =
   'https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4';
 const VIDEO_FALLBACK_URL = '/intro_video.mp4';
@@ -71,24 +71,24 @@ const TECHNOLOGIES = [
     description:
       'Scans beneath the soil to spot hidden plastic and metal landmines without touching them.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-1_hsqcpq.jpg',
-    alt: 'Ground-penetrating radar scanning the soil for hidden landmines',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898817/M.I.R.A.G.E._Rover_Scanning_Desert_Terrain_ga1tiv.png',
+    alt: 'M.I.R.A.G.E. rover scanning desert terrain with ground-penetrating radar',
   },
   {
     title: 'Smart Sensor Fusion',
     description:
       'Combines radar and sensors so the robot clearly identifies real threats and avoids false alarms from rocks or trash.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-2_xlabsk.jpg',
-    alt: 'Robot sensor array fusing radar and sensor data to identify real threats',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_Scanning_Martian_Debris_zmtj8u.png',
+    alt: 'M.I.R.A.G.E. rover fusing sensor data to tell real threats from debris',
   },
   {
     title: 'Drives Autonomously or by Remote',
     description:
       'Can drive itself across rocks, sand, and rough dirt, or be driven safely by an operator from a distance.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-3_wbpacn.jpg',
-    alt: 'Tracked robot driving autonomously across rough desert terrain',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_at_Dusk_qbnhcc.png',
+    alt: 'M.I.R.A.G.E. rover driving autonomously across terrain at dusk',
   },
 ];
 
@@ -344,7 +344,7 @@ function Hero() {
       <motion.div style={{ y }} className="absolute inset-x-0 top-[-10%] h-[120%]">
         <motion.img
           src={HERO_IMAGE}
-          alt="Dusty desert reconnaissance rover with ground-penetrating radar scanner by HUSORO Technologies"
+          alt="M.I.R.A.G.E. rover driving across a golden desert plain by HUSORO Technologies"
           width={1672}
           height={941}
           fetchPriority="high"
