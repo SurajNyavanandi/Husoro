@@ -28,7 +28,7 @@ import {
 const BRAND_LOGO =
   'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
 const HERO_IMAGE =
-  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_in_the_Golden_Desert_foacih.png';
+  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901203/M.I.R.A.G.E._Rover_in_Golden_Desert_Dust_pgmlqg.png';
 const VIDEO_URL =
   'https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4';
 const VIDEO_FALLBACK_URL = '/intro_video.mp4';
@@ -46,9 +46,8 @@ const ARMY = '#4B5320';
 const KHAKI = '#B8A65A';
 const PALE_OLIVE = '#C9D19A';
 
-const WORDMARK_FONT = "'Bank Gothic', 'Oxanium', 'Arial Black', sans-serif";
-const DISPLAY_FONT = "'Barlow Condensed', 'Arial Narrow', sans-serif";
-const BODY_FONT = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
+// Bank Gothic everywhere. Fallbacks are used only if the licensed file is missing.
+const SITE_FONT = "'Bank Gothic', 'Oxanium', 'Arial Black', sans-serif";
 
 const SHARED_CONTAINER = 'mx-auto w-full max-w-300 px-5 sm:px-6 lg:px-8';
 const FOCUS_RING =
@@ -71,24 +70,24 @@ const TECHNOLOGIES = [
     description:
       'Scans beneath the soil to spot hidden plastic and metal landmines without touching them.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898817/M.I.R.A.G.E._Rover_Scanning_Desert_Terrain_ga1tiv.png',
-    alt: 'M.I.R.A.G.E. rover scanning desert terrain with ground-penetrating radar',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_Scans_Buried_Object_grhgls.png',
+    alt: 'M.I.R.A.G.E. rover scanning the ground with radar to detect a buried object',
   },
   {
     title: 'Smart Sensor Fusion',
     description:
       'Combines radar and sensors so the robot clearly identifies real threats and avoids false alarms from rocks or trash.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_Scanning_Martian_Debris_zmtj8u.png',
-    alt: 'M.I.R.A.G.E. rover fusing sensor data to tell real threats from debris',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_Scanning_Forest_Floor_btl3cp.png',
+    alt: 'M.I.R.A.G.E. rover scanning the forest floor and separating threats from debris',
   },
   {
     title: 'Drives Autonomously or by Remote',
     description:
       'Can drive itself across rocks, sand, and rough dirt, or be driven safely by an operator from a distance.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794898816/M.I.R.A.G.E._Rover_at_Dusk_qbnhcc.png',
-    alt: 'M.I.R.A.G.E. rover driving autonomously across terrain at dusk',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_on_a_Glowing_Forest_Trail_wp347t.png',
+    alt: 'M.I.R.A.G.E. rover driving autonomously along a glowing forest trail',
   },
 ];
 
@@ -241,7 +240,7 @@ function Header({
             <span
               className={`text-2xl tracking-wide ${onDark ? 'text-white' : 'text-black'}`}
               style={{
-                fontFamily: WORDMARK_FONT,
+                fontFamily: SITE_FONT,
                 fontWeight: 700,
                 textShadow: onDark ? '0 2px 12px rgba(0,0,0,0.5)' : undefined,
               }}
@@ -344,7 +343,7 @@ function Hero() {
       <motion.div style={{ y }} className="absolute inset-x-0 top-[-10%] h-[120%]">
         <motion.img
           src={HERO_IMAGE}
-          alt="M.I.R.A.G.E. rover driving across a golden desert plain by HUSORO Technologies"
+          alt="M.I.R.A.G.E. rover driving through golden desert dust by HUSORO Technologies"
           width={1672}
           height={941}
           fetchPriority="high"
@@ -367,13 +366,13 @@ function Hero() {
         }}
       />
 
-      {/* Mobile only: light fade at the top so the text and header stay readable. The photo keeps its natural colors. */}
+      {/* Mobile only: soft top shade so the header and headline read clearly */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[55%] md:hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[60%] md:hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0) 100%)',
+            'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 100%)',
         }}
       />
 
@@ -383,11 +382,13 @@ function Hero() {
             <h1
               className="font-extrabold uppercase text-white"
               style={{
-                fontFamily: DISPLAY_FONT,
-                fontSize: 'clamp(3.75rem, 16vw, 9.5rem)',
-                lineHeight: 0.88,
+                fontFamily: SITE_FONT,
+                fontSize: 'clamp(3.25rem, 14vw, 9.5rem)',
+                lineHeight: 0.9,
                 letterSpacing: '-0.01em',
-                textShadow: '0 4px 18px rgba(0,0,0,0.45)',
+                WebkitTextStroke: '1px rgba(255,255,255,0.35)',
+                textShadow:
+                  '0 2px 0 rgba(0,0,0,0.6), 0 6px 18px rgba(0,0,0,0.7), 0 0 36px rgba(0,0,0,0.5)',
               }}
             >
               ROBOTS
@@ -395,15 +396,16 @@ function Hero() {
           </Reveal>
 
           <Reveal direction="left" delay={0.12}>
-            <div className="mt-5 border-l-4 py-1 pl-4 sm:pl-5" style={{ borderColor: WHITE }}>
+            <div className="mt-4 border-l-4 py-0.5 pl-4 sm:mt-5 sm:pl-5" style={{ borderColor: KHAKI }}>
               <p
                 className="font-semibold uppercase text-white"
                 style={{
-                  fontFamily: DISPLAY_FONT,
-                  fontSize: 'clamp(1.125rem, 4.2vw, 2rem)',
-                  lineHeight: 1.12,
-                  letterSpacing: '0.06em',
-                  textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                  fontFamily: SITE_FONT,
+                  fontSize: 'clamp(1rem, 4vw, 2rem)',
+                  lineHeight: 1.15,
+                  letterSpacing: '0.05em',
+                  textShadow:
+                    '0 1px 0 rgba(0,0,0,0.6), 0 3px 12px rgba(0,0,0,0.8), 0 0 24px rgba(0,0,0,0.6)',
                 }}
               >
                 DESIGNED TO SAVE, PROTECT, &amp; SERVE
@@ -412,8 +414,8 @@ function Hero() {
           </Reveal>
 
           <Reveal direction="left" delay={0.24}>
-            <div className="mt-7 flex items-center gap-2" aria-hidden="true">
-              <span className="h-1 w-16 rounded-full bg-white" />
+            <div className="mt-6 flex items-center gap-2 sm:mt-7" aria-hidden="true">
+              <span className="h-1 w-14 rounded-full bg-white sm:w-16" />
               <span className="h-1 w-3 rounded-full" style={{ backgroundColor: ARMY }} />
             </div>
           </Reveal>
@@ -438,7 +440,7 @@ function About() {
           <h2
             id="about-heading"
             className="text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl"
-            style={{ fontFamily: DISPLAY_FONT }}
+            style={{ fontFamily: SITE_FONT }}
           >
             About <span style={{ color: KHAKI }}>HUSORO</span>
           </h2>
@@ -626,7 +628,7 @@ function Product({ onNavigate }: { onNavigate: (id: string) => void }) {
             <h2
               id="product-heading"
               className="mb-4 text-4xl font-extrabold uppercase leading-none text-slate-900 sm:text-5xl"
-              style={{ fontFamily: DISPLAY_FONT }}
+              style={{ fontFamily: SITE_FONT }}
             >
               Product <span style={{ color: ARMY }}>M.I.R.A.G.E.</span>
             </h2>
@@ -675,7 +677,7 @@ function Technology() {
           <h2
             id="technology-heading"
             className="mb-4 text-4xl font-extrabold uppercase leading-none text-black sm:text-5xl"
-            style={{ fontFamily: DISPLAY_FONT }}
+            style={{ fontFamily: SITE_FONT }}
           >
             Technology <span style={{ color: ARMY }}>Capabilities</span>
           </h2>
@@ -717,7 +719,7 @@ function Technology() {
                     </span>
                     <h3
                       className="mt-3 mb-3 text-3xl font-extrabold uppercase leading-tight text-slate-900 transition-colors group-hover:text-black sm:text-4xl"
-                      style={{ fontFamily: DISPLAY_FONT }}
+                      style={{ fontFamily: SITE_FONT }}
                     >
                       {tech.title}
                     </h3>
@@ -814,7 +816,7 @@ function Contact() {
           <h2
             id="contact-heading"
             className="text-4xl font-extrabold uppercase leading-none text-black sm:text-5xl"
-            style={{ fontFamily: DISPLAY_FONT }}
+            style={{ fontFamily: SITE_FONT }}
           >
             Contact <span style={{ color: ARMY }}>Us</span>
           </h2>
@@ -943,7 +945,7 @@ function Contact() {
             <div className="flex h-full flex-col justify-center gap-6 rounded-3xl bg-black p-6 text-white sm:p-10">
               <h3
                 className="text-2xl font-extrabold uppercase tracking-wide"
-                style={{ fontFamily: DISPLAY_FONT }}
+                style={{ fontFamily: SITE_FONT }}
               >
                 Get in Touch
               </h3>
@@ -1005,7 +1007,7 @@ function Footer({ onNavigate }: { onNavigate: (id: string) => void }) {
             decoding="async"
             className="h-8 w-8 rounded-lg bg-white object-cover"
           />
-          <span className="text-xl tracking-wide" style={{ fontFamily: WORDMARK_FONT, fontWeight: 700 }}>
+          <span className="text-xl tracking-wide" style={{ fontFamily: SITE_FONT, fontWeight: 700 }}>
             HUSORO
           </span>
         </div>
@@ -1056,14 +1058,14 @@ export default function App() {
       document.head.appendChild(style);
     }
 
-    // Display, body, and fallback wordmark fonts from Google Fonts
+    // Fallback font from Google Fonts (used only if Bank Gothic is missing)
     const fontId = 'husoro-fonts';
     if (!document.getElementById(fontId)) {
       const link = document.createElement('link');
       link.id = fontId;
       link.rel = 'stylesheet';
       link.href =
-        'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Oxanium:wght@600;700;800&display=swap';
+        'https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&family=Inter:wght@400;500;600&display=swap';
       document.head.appendChild(link);
     }
   }, []);
@@ -1099,7 +1101,7 @@ export default function App() {
   return (
     <div
       className="min-h-screen overflow-x-hidden bg-white antialiased text-slate-900"
-      style={{ fontFamily: BODY_FONT }}
+      style={{ fontFamily: SITE_FONT }}
     >
       <ScrollProgress />
 
@@ -1110,7 +1112,6 @@ export default function App() {
         setMenuOpen={setMenuOpen}
         onNavigate={handleNavigate}
       />
-
       <main>
         <Hero />
         <About />
