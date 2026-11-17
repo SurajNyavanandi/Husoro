@@ -28,13 +28,13 @@ import {
 const BRAND_LOGO =
   'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794060891/Gemini_Generated_Image_tatgbctatgbctatg_kltjho.jpg';
 const HERO_IMAGE =
-  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901203/M.I.R.A.G.E._Rover_in_Golden_Desert_Dust_pgmlqg.png';
+  'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794907293/M.I.R.A.G.E._Rover_Racing_Through_Dust_pmph0f.jpg';
 const VIDEO_URL =
   'https://res.cloudinary.com/dfr0zghtc/video/upload/v1793773090/intro_video_y9ppov.mp4';
 const VIDEO_FALLBACK_URL = '/intro_video.mp4';
 const LINKEDIN_URL = 'https://www.linkedin.com/company/husoro-technologies/';
 const CONTACT_EMAIL = 'info@husoro.com';
-const WHATSAPP_NUMBER = '919876543210';
+const WHATSAPP_NUMBER = '919550840330';
 
 // Core theme: black and white
 const INK = '#0B0B0B';
@@ -70,30 +70,29 @@ const TECHNOLOGIES = [
     description:
       'Scans beneath the soil to spot hidden plastic and metal landmines without touching them.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_Scans_Buried_Object_grhgls.png',
-    alt: 'M.I.R.A.G.E. rover scanning the ground with radar to detect a buried object',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794907293/M.I.R.A.G.E._Rover_Scanning_Underground_xsctod.jpg',
+    alt: 'M.I.R.A.G.E. rover scanning underground with radar to detect hidden objects',
   },
   {
     title: 'Smart Sensor Fusion',
     description:
       'Combines radar and sensors so the robot clearly identifies real threats and avoids false alarms from rocks or trash.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_Scanning_Forest_Floor_btl3cp.png',
-    alt: 'M.I.R.A.G.E. rover scanning the forest floor and separating threats from debris',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794907293/M.I.R.A.G.E._Forest_Reconnaissance_Rover_bfwuq0.jpg',
+    alt: 'M.I.R.A.G.E. forest reconnaissance rover fusing sensor data to tell threats from debris',
   },
   {
     title: 'Drives Autonomously or by Remote',
     description:
       'Can drive itself across rocks, sand, and rough dirt, or be driven safely by an operator from a distance.',
     image:
-      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794901204/M.I.R.A.G.E._Rover_on_a_Glowing_Forest_Trail_wp347t.png',
-    alt: 'M.I.R.A.G.E. rover driving autonomously along a glowing forest trail',
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794907293/M.I.R.A.G.E._Rover_Through_the_Forest_wdkjpz.jpg',
+    alt: 'M.I.R.A.G.E. rover driving autonomously through a forest',
   },
 ];
 
 const ERROR_REQUIRED = 'Please fill in your name, email, subject, and message.';
 const ERROR_EMAIL = 'Please enter a valid email address.';
-const STATUS_OPENING = 'Opening WhatsApp with your message ready...';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* ----------------------------- GLOBAL STYLES ----------------------------- */
@@ -343,7 +342,7 @@ function Hero() {
       <motion.div style={{ y }} className="absolute inset-x-0 top-[-10%] h-[120%]">
         <motion.img
           src={HERO_IMAGE}
-          alt="M.I.R.A.G.E. rover driving through golden desert dust by HUSORO Technologies"
+          alt="M.I.R.A.G.E. rover racing through dust by HUSORO Technologies"
           width={1672}
           height={941}
           fetchPriority="high"
@@ -742,8 +741,7 @@ type Phase = 'idle' | 'sending' | 'sent';
 
 function Contact() {
   const [form, setForm] = useState<FormState>({ name: '', email: '', phone: '', subject: '', message: '' });
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('idle');
   const [copied, setCopied] = useState(false);
 
@@ -763,15 +761,14 @@ function Contact() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFeedback(null);
-    setWhatsappUrl(null);
+    setError(null);
 
     if (!form.name.trim() || !form.email.trim() || !form.subject.trim() || !form.message.trim()) {
-      setFeedback({ type: 'error', text: ERROR_REQUIRED });
+      setError(ERROR_REQUIRED);
       return;
     }
     if (!EMAIL_RE.test(form.email.trim())) {
-      setFeedback({ type: 'error', text: ERROR_EMAIL });
+      setError(ERROR_EMAIL);
       return;
     }
 
@@ -785,8 +782,6 @@ function Contact() {
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 
     setPhase('sending');
-    setWhatsappUrl(url);
-    setFeedback({ type: 'success', text: STATUS_OPENING });
 
     // Background log; failures are ignored so the WhatsApp redirect always works
     fetch('/contact.php', {
@@ -825,27 +820,12 @@ function Contact() {
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <Reveal direction="left" className="lg:col-span-7">
             <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-xl shadow-black/10 sm:p-10">
-              {feedback && (
+              {error && (
                 <div
                   role="alert"
-                  className={`mb-6 rounded-xl border p-4 text-sm ${
-                    feedback.type === 'success'
-                      ? 'border-black/20 bg-black/5 text-black'
-                      : 'border-red-200 bg-red-50 text-red-700'
-                  }`}
+                  className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
                 >
-                  <p>{feedback.text}</p>
-                  {whatsappUrl && (
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`mt-3 inline-flex items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1C1C1C] ${FOCUS_RING}`}
-                    >
-                      <span>Open WhatsApp directly</span>
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                    </a>
-                  )}
+                  {error}
                 </div>
               )}
 
@@ -931,7 +911,7 @@ function Contact() {
 
                 <button
                   type="submit"
-                  disabled={phase === 'sending'}
+                  disabled={phase !== 'idle'}
                   className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-black px-6 py-3.5 text-sm font-semibold tracking-wide text-white shadow-lg shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-[#1C1C1C] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
@@ -1112,6 +1092,7 @@ export default function App() {
         setMenuOpen={setMenuOpen}
         onNavigate={handleNavigate}
       />
+
       <main>
         <Hero />
         <About />
