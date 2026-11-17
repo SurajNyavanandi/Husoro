@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
 import {
   ArrowRight,
   Check,
   Copy,
-  Layers,
   Mail,
   MapPin,
   Maximize,
@@ -12,8 +17,6 @@ import {
   Minimize,
   Pause,
   Play,
-  Radar,
-  Radio,
   Send,
   Volume2,
   VolumeX,
@@ -33,24 +36,25 @@ const LINKEDIN_URL = 'https://www.linkedin.com/company/husoro-technologies/';
 const CONTACT_EMAIL = 'info@husoro.com';
 const WHATSAPP_NUMBER = '919876543210';
 
-// Core theme: army green and white
-const GREEN = '#4B5320';
-const GREEN_DARK = '#3A4018';
-const OLIVE_DARK = '#2A2D14';
-const SAND = '#F3F4EC';
+// Core theme: black and white
+const INK = '#0B0B0B';
+const WHITE = '#FFFFFF';
+const SAND = '#F4F4F1';
 
-// Supporting accents, used sparingly on dark green
-const PALE_OLIVE = '#C9D19A';
+// Accents: army green used sparingly, plus neutral highlights
+const ARMY = '#4B5320';
 const KHAKI = '#B8A65A';
+const PALE_OLIVE = '#C9D19A';
 
+const WORDMARK_FONT = "'Bank Gothic', 'Oxanium', 'Arial Black', sans-serif";
 const DISPLAY_FONT = "'Barlow Condensed', 'Arial Narrow', sans-serif";
 const BODY_FONT = "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif";
 
 const SHARED_CONTAINER = 'mx-auto w-full max-w-300 px-5 sm:px-6 lg:px-8';
 const FOCUS_RING =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4B5320]';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black';
 const INPUT_CLASS =
-  'w-full rounded-lg border border-[#4B5320]/20 bg-white px-4 py-3 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-[#4B5320]/40 focus:border-[#4B5320] focus:ring-2 focus:ring-[#4B5320]/20 sm:text-sm';
+  'w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-black/35 focus:border-black focus:ring-2 focus:ring-black/15 sm:text-sm';
 const CONTROL_BUTTON = `flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/30 ${FOCUS_RING} focus-visible:outline-white`;
 
 const NAV_LINKS = [
@@ -66,19 +70,25 @@ const TECHNOLOGIES = [
     title: 'Radar That Sees Underground',
     description:
       'Scans beneath the soil to spot hidden plastic and metal landmines without touching them.',
-    icon: Radar,
+    image:
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-1_hsqcpq.jpg',
+    alt: 'Ground-penetrating radar scanning the soil for hidden landmines',
   },
   {
     title: 'Smart Sensor Fusion',
     description:
       'Combines radar and sensors so the robot clearly identifies real threats and avoids false alarms from rocks or trash.',
-    icon: Layers,
+    image:
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-2_xlabsk.jpg',
+    alt: 'Robot sensor array fusing radar and sensor data to identify real threats',
   },
   {
     title: 'Drives Autonomously or by Remote',
     description:
       'Can drive itself across rocks, sand, and rough dirt, or be driven safely by an operator from a distance.',
-    icon: Radio,
+    image:
+      'https://res.cloudinary.com/dfr0zghtc/image/upload/v1794895509/image-3_wbpacn.jpg',
+    alt: 'Tracked robot driving autonomously across rough desert terrain',
   },
 ];
 
@@ -86,6 +96,23 @@ const ERROR_REQUIRED = 'Please fill in your name, email, subject, and message.';
 const ERROR_EMAIL = 'Please enter a valid email address.';
 const STATUS_OPENING = 'Opening WhatsApp with your message ready...';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* ----------------------------- GLOBAL STYLES ----------------------------- */
+
+const GLOBAL_CSS = `
+@font-face {
+  font-family: 'Bank Gothic';
+  src: url('/fonts/bank-gothic.woff2') format('woff2'),
+       url('/fonts/bank-gothic.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+`;
 
 /* ----------------------------- HELPERS ----------------------------- */
 
@@ -154,6 +181,19 @@ function NavAnchor({
   );
 }
 
+/* ----------------------------- SCROLL PROGRESS ----------------------------- */
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll();
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ scaleX: scrollYProgress, backgroundColor: KHAKI }}
+      className="fixed inset-x-0 top-0 z-60 h-0.5 origin-left"
+    />
+  );
+}
+
 /* ----------------------------- HEADER ----------------------------- */
 
 function Header({
@@ -169,7 +209,7 @@ function Header({
   setMenuOpen: (v: boolean) => void;
   onNavigate: (id: string) => void;
 }) {
-  // White header over the hero, frosted green-bordered bar after scrolling
+  // White header over the hero, frosted white bar with a black-tint border after scrolling
   const onDark = !scrolled && !menuOpen;
 
   return (
@@ -178,7 +218,7 @@ function Header({
         className={`mx-auto max-w-300 rounded-2xl transition-all duration-300 ${
           onDark
             ? 'border border-transparent bg-transparent'
-            : 'border border-[#4B5320]/20 bg-white/95 shadow-lg backdrop-blur-md'
+            : 'border border-black/10 bg-white/95 shadow-lg backdrop-blur-md'
         }`}
       >
         <div className="flex h-16 items-center justify-between px-4 sm:px-6">
@@ -199,9 +239,10 @@ function Header({
               className="h-9 w-9 rounded-lg object-cover transition-transform duration-200 group-hover:scale-105"
             />
             <span
-              className={`text-xl font-extrabold tracking-wide ${onDark ? 'text-white' : 'text-[#4B5320]'}`}
+              className={`text-2xl tracking-wide ${onDark ? 'text-white' : 'text-black'}`}
               style={{
-                fontFamily: DISPLAY_FONT,
+                fontFamily: WORDMARK_FONT,
+                fontWeight: 700,
                 textShadow: onDark ? '0 2px 12px rgba(0,0,0,0.5)' : undefined,
               }}
             >
@@ -221,11 +262,11 @@ function Header({
                   className={`relative rounded-lg px-3 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors ${FOCUS_RING} ${
                     onDark
                       ? isActive
-                        ? 'text-white after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#C9D19A]'
+                        ? 'text-white after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-white'
                         : 'text-white/85 hover:text-white'
                       : isActive
-                        ? 'text-[#4B5320] after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-[#4B5320]'
-                        : 'text-slate-600 hover:text-[#4B5320]'
+                        ? 'text-black after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-black'
+                        : 'text-slate-600 hover:text-black'
                   }`}
                 />
               );
@@ -236,7 +277,7 @@ function Header({
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors md:hidden ${FOCUS_RING} ${
-              onDark ? 'text-white hover:bg-white/10' : 'text-[#4B5320] hover:bg-[#4B5320]/10'
+              onDark ? 'text-white hover:bg-white/10' : 'text-black hover:bg-black/5'
             }`}
             aria-label="Toggle Navigation Menu"
             aria-expanded={menuOpen}
@@ -257,7 +298,7 @@ function Header({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="border-t border-[#4B5320]/15 px-3 pb-3 pt-2 md:hidden"
+              className="border-t border-black/10 px-3 pb-3 pt-2 md:hidden"
               aria-label="Mobile"
             >
               {NAV_LINKS.map((item) => {
@@ -270,8 +311,8 @@ function Header({
                     onNavigate={onNavigate}
                     className={`flex min-h-11 items-center rounded-xl px-3 text-base transition-colors ${FOCUS_RING} ${
                       isActive
-                        ? 'bg-[#4B5320]/10 font-bold text-[#4B5320]'
-                        : 'text-slate-700 hover:bg-[#4B5320]/5 hover:text-[#4B5320]'
+                        ? 'bg-black/5 font-bold text-black'
+                        : 'text-slate-700 hover:bg-black/5 hover:text-black'
                     }`}
                   />
                 );
@@ -288,6 +329,7 @@ function Header({
 
 function Hero() {
   const ref = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   // Wrapper is 120% tall and starts at -10%, so the parallax never reveals an edge
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '6%']);
@@ -297,10 +339,10 @@ function Hero() {
       id="home"
       ref={ref}
       className="relative isolate flex min-h-svh scroll-mt-24 items-start overflow-hidden md:min-h-[92vh] md:items-center"
-      style={{ backgroundColor: OLIVE_DARK }}
+      style={{ backgroundColor: INK }}
     >
       <motion.div style={{ y }} className="absolute inset-x-0 top-[-10%] h-[120%]">
-        <img
+        <motion.img
           src={HERO_IMAGE}
           alt="Dusty desert reconnaissance rover with ground-penetrating radar scanner by HUSORO Technologies"
           width={1672}
@@ -308,38 +350,34 @@ function Hero() {
           fetchPriority="high"
           decoding="async"
           referrerPolicy="no-referrer"
+          initial={reduceMotion ? false : { scale: 1.08 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.4, ease: [0.2, 0.7, 0.2, 1] }}
           className="h-full w-full object-cover object-[72%_50%] md:object-[70%_center]"
         />
       </motion.div>
 
-      {/* Desktop: deep olive on the left, fading into the photo */}
+      {/* Desktop only: black shade on the left, fading into the photo */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 hidden md:block"
         style={{
           background:
-            'linear-gradient(90deg, rgba(42,45,20,0.92) 0%, rgba(42,45,20,0.75) 32%, rgba(42,45,20,0.25) 58%, rgba(42,45,20,0) 72%)',
+            'linear-gradient(90deg, rgba(0,0,0,0.93) 0%, rgba(0,0,0,0.78) 32%, rgba(0,0,0,0.28) 58%, rgba(0,0,0,0) 72%)',
         }}
       />
 
-      {/* Mobile: olive panel at the top so the text reads clearly, the rover stays visible below */}
+      {/* Mobile only: light fade at the top so the text and header stay readable. The photo keeps its natural colors. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[70%] md:hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[55%] md:hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(42,45,20,0.97) 0%, rgba(42,45,20,0.9) 50%, rgba(42,45,20,0.4) 80%, rgba(42,45,20,0) 100%)',
+            'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0) 100%)',
         }}
       />
 
-      {/* Top shade keeps the transparent header readable */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-32"
-        style={{ background: 'linear-gradient(180deg, rgba(42,45,20,0.6), rgba(42,45,20,0))' }}
-      />
-
-      <div className={`${SHARED_CONTAINER} relative z-10 pb-10 pt-28 sm:pt-32 md:pb-0 md:pt-28`}>
+      <div className={`${SHARED_CONTAINER} relative z-10 pt-28 pb-12 sm:pt-32 md:pt-28 md:pb-0`}>
         <div className="max-w-136">
           <Reveal direction="left">
             <h1
@@ -349,7 +387,7 @@ function Hero() {
                 fontSize: 'clamp(3.75rem, 16vw, 9.5rem)',
                 lineHeight: 0.88,
                 letterSpacing: '-0.01em',
-                textShadow: '0 6px 28px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.35)',
+                textShadow: '0 4px 18px rgba(0,0,0,0.45)',
               }}
             >
               ROBOTS
@@ -357,15 +395,15 @@ function Hero() {
           </Reveal>
 
           <Reveal direction="left" delay={0.12}>
-            <div className="mt-5 border-l-4 py-1 pl-4 sm:pl-5" style={{ borderColor: KHAKI }}>
+            <div className="mt-5 border-l-4 py-1 pl-4 sm:pl-5" style={{ borderColor: WHITE }}>
               <p
-                className="font-semibold uppercase text-white/95"
+                className="font-semibold uppercase text-white"
                 style={{
                   fontFamily: DISPLAY_FONT,
                   fontSize: 'clamp(1.125rem, 4.2vw, 2rem)',
                   lineHeight: 1.12,
                   letterSpacing: '0.06em',
-                  textShadow: '0 2px 14px rgba(0,0,0,0.6)',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.5)',
                 }}
               >
                 DESIGNED TO SAVE, PROTECT, &amp; SERVE
@@ -375,8 +413,8 @@ function Hero() {
 
           <Reveal direction="left" delay={0.24}>
             <div className="mt-7 flex items-center gap-2" aria-hidden="true">
-              <span className="h-1 w-16 rounded-full" style={{ backgroundColor: PALE_OLIVE }} />
-              <span className="h-1 w-3 rounded-full" style={{ backgroundColor: KHAKI }} />
+              <span className="h-1 w-16 rounded-full bg-white" />
+              <span className="h-1 w-3 rounded-full" style={{ backgroundColor: ARMY }} />
             </div>
           </Reveal>
         </div>
@@ -393,7 +431,7 @@ function About() {
       id="about"
       aria-labelledby="about-heading"
       className="scroll-mt-24 py-16 text-white sm:py-24"
-      style={{ backgroundColor: GREEN }}
+      style={{ backgroundColor: INK }}
     >
       <div className={`${SHARED_CONTAINER} grid gap-12 md:grid-cols-12 md:gap-16`}>
         <Reveal direction="left" className="md:col-span-5">
@@ -402,15 +440,15 @@ function About() {
             className="text-4xl font-extrabold uppercase leading-none text-white sm:text-5xl"
             style={{ fontFamily: DISPLAY_FONT }}
           >
-            About <span style={{ color: PALE_OLIVE }}>HUSORO</span>
+            About <span style={{ color: KHAKI }}>HUSORO</span>
           </h2>
-          <div className="mt-6 h-1 w-20 rounded-full" style={{ backgroundColor: KHAKI }} aria-hidden="true" />
+          <div className="mt-6 h-1 w-20 rounded-full bg-white" aria-hidden="true" />
         </Reveal>
 
         <Reveal
           direction="right"
           delay={0.15}
-          className="space-y-5 text-sm leading-relaxed text-white/85 sm:text-base md:col-span-7"
+          className="space-y-5 text-sm leading-relaxed text-white/80 sm:text-base md:col-span-7"
         >
           <p>
             <strong className="font-semibold text-white">Husoro Technologies</strong> is a deep-tech robotics company building autonomous ground vehicles for defense and high-risk operations.
@@ -515,7 +553,7 @@ function Product({ onNavigate }: { onNavigate: (id: string) => void }) {
           {/* Mobile and tablet: 16:9 player like a YouTube embed. Desktop: large framed player. */}
           <div
             ref={containerRef}
-            className="group relative aspect-video w-full overflow-hidden bg-black md:aspect-auto md:h-[80svh] md:rounded-3xl md:shadow-2xl md:shadow-[#4B5320]/25 [&:fullscreen]:aspect-auto [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none"
+            className="group relative aspect-video w-full overflow-hidden bg-black md:aspect-auto md:h-[80svh] md:rounded-3xl md:shadow-2xl md:shadow-black/30 [&:fullscreen]:aspect-auto [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none"
           >
             <video
               ref={videoRef}
@@ -543,10 +581,10 @@ function Product({ onNavigate }: { onNavigate: (id: string) => void }) {
 
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#2A2D14]/70 to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/70 to-transparent"
             />
 
-            <div className="absolute right-3 bottom-3 flex items-center gap-2 rounded-xl border border-white/20 bg-[#4B5320]/85 p-1.5 opacity-90 shadow-lg backdrop-blur-md transition-opacity group-hover:opacity-100 sm:right-6 sm:bottom-6 sm:p-2 md:right-8 md:bottom-8">
+            <div className="absolute right-3 bottom-3 flex items-center gap-2 rounded-xl border border-white/20 bg-black/85 p-1.5 opacity-90 shadow-lg backdrop-blur-md transition-opacity group-hover:opacity-100 sm:right-6 sm:bottom-6 sm:p-2 md:right-8 md:bottom-8">
               <button
                 type="button"
                 onClick={togglePlay}
@@ -580,8 +618,8 @@ function Product({ onNavigate }: { onNavigate: (id: string) => void }) {
       <div className="py-16 sm:py-24" style={{ backgroundColor: SAND }}>
         <div className={`${SHARED_CONTAINER} grid items-center gap-12 md:grid-cols-2 md:gap-16`}>
           <Reveal direction="left">
-            <div className="mb-4 inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-[#4B5320] uppercase">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#4B5320]" aria-hidden="true" />
+            <div className="mb-4 inline-flex items-center gap-2 text-xs font-semibold tracking-wider text-black uppercase">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: ARMY }} aria-hidden="true" />
               <span>Flagship Landmine-Finding Rover</span>
             </div>
 
@@ -590,22 +628,22 @@ function Product({ onNavigate }: { onNavigate: (id: string) => void }) {
               className="mb-4 text-4xl font-extrabold uppercase leading-none text-slate-900 sm:text-5xl"
               style={{ fontFamily: DISPLAY_FONT }}
             >
-              Product <span className="text-[#4B5320]">M.I.R.A.G.E.</span>
+              Product <span style={{ color: ARMY }}>M.I.R.A.G.E.</span>
             </h2>
 
             <p className="mb-5 text-xs font-semibold tracking-wide text-slate-700 uppercase sm:text-sm">
-              <span className="text-[#4B5320]">M</span>inefield{' '}
-              <span className="text-[#4B5320]">I</span>ntelligent{' '}
-              <span className="text-[#4B5320]">R</span>adar and{' '}
-              <span className="text-[#4B5320]">A</span>utonomous{' '}
-              <span className="text-[#4B5320]">G</span>round{' '}
-              <span className="text-[#4B5320]">E</span>xplorer
+              <span className="text-black">M</span>inefield{' '}
+              <span className="text-black">I</span>ntelligent{' '}
+              <span className="text-black">R</span>adar and{' '}
+              <span className="text-black">A</span>utonomous{' '}
+              <span className="text-black">G</span>round{' '}
+              <span className="text-black">E</span>xplorer
             </p>
 
             <button
               type="button"
               onClick={() => onNavigate('technology')}
-              className={`group inline-flex items-center gap-2 rounded text-sm font-semibold text-[#4B5320] transition-all hover:gap-3 ${FOCUS_RING}`}
+              className={`group inline-flex items-center gap-2 rounded text-sm font-semibold text-black transition-all hover:gap-3 ${FOCUS_RING}`}
             >
               <span>See how the technology works</span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -636,10 +674,10 @@ function Technology() {
         <Reveal className="mx-auto mb-14 max-w-3xl text-center sm:mb-20">
           <h2
             id="technology-heading"
-            className="mb-4 text-4xl font-extrabold uppercase leading-none text-[#4B5320] sm:text-5xl"
+            className="mb-4 text-4xl font-extrabold uppercase leading-none text-black sm:text-5xl"
             style={{ fontFamily: DISPLAY_FONT }}
           >
-            Technology <span className="text-slate-900">Capabilities</span>
+            Technology <span style={{ color: ARMY }}>Capabilities</span>
           </h2>
           <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
             Smart sensors and self-driving robots built to find hidden explosives and protect lives.
@@ -648,7 +686,6 @@ function Technology() {
 
         <div className="space-y-12 sm:space-y-20">
           {TECHNOLOGIES.map((tech, idx) => {
-            const Icon = tech.icon;
             const reverse = idx % 2 === 1;
             return (
               <Reveal key={tech.title} direction={reverse ? 'right' : 'left'}>
@@ -658,22 +695,28 @@ function Technology() {
                   }`}
                 >
                   <div className="w-full min-w-0 flex-1">
-                    <div className="flex aspect-4/3 items-center justify-center rounded-3xl bg-[#4B5320] shadow-xl shadow-[#4B5320]/20 transition-transform duration-500 group-hover:-translate-y-1.5">
-                      <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition-transform duration-500 group-hover:scale-110">
-                        <Icon className="h-12 w-12" strokeWidth={1.5} aria-hidden="true" />
-                      </div>
+                    <div className="aspect-4/3 overflow-hidden rounded-3xl bg-black shadow-xl shadow-black/20 transition-transform duration-500 group-hover:-translate-y-1.5">
+                      <img
+                        src={tech.image}
+                        alt={tech.alt}
+                        width={1024}
+                        height={768}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
                     </div>
                   </div>
 
                   <div className="w-full min-w-0 flex-1">
                     <span
-                      className="inline-block rounded-md px-2.5 py-0.5 text-xs font-bold tracking-wider text-[#2A2D14] uppercase"
-                      style={{ backgroundColor: PALE_OLIVE }}
+                      className="inline-block rounded-md px-2.5 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
+                      style={{ backgroundColor: ARMY }}
                     >
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <h3
-                      className="mt-3 mb-3 text-3xl font-extrabold uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#4B5320] sm:text-4xl"
+                      className="mt-3 mb-3 text-3xl font-extrabold uppercase leading-tight text-slate-900 transition-colors group-hover:text-black sm:text-4xl"
                       style={{ fontFamily: DISPLAY_FONT }}
                     >
                       {tech.title}
@@ -770,22 +813,22 @@ function Contact() {
         <Reveal className="mb-10 sm:mb-14">
           <h2
             id="contact-heading"
-            className="text-4xl font-extrabold uppercase leading-none text-[#4B5320] sm:text-5xl"
+            className="text-4xl font-extrabold uppercase leading-none text-black sm:text-5xl"
             style={{ fontFamily: DISPLAY_FONT }}
           >
-            Contact <span className="text-slate-900">Us</span>
+            Contact <span style={{ color: ARMY }}>Us</span>
           </h2>
         </Reveal>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <Reveal direction="left" className="lg:col-span-7">
-            <div className="rounded-3xl border border-[#4B5320]/10 bg-white p-6 shadow-xl shadow-[#4B5320]/10 sm:p-10">
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-xl shadow-black/10 sm:p-10">
               {feedback && (
                 <div
                   role="alert"
                   className={`mb-6 rounded-xl border p-4 text-sm ${
                     feedback.type === 'success'
-                      ? 'border-[#4B5320]/30 bg-[#4B5320]/10 text-[#4B5320]'
+                      ? 'border-black/20 bg-black/5 text-black'
                       : 'border-red-200 bg-red-50 text-red-700'
                   }`}
                 >
@@ -795,7 +838,7 @@ function Contact() {
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[#4B5320] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#3A4018] ${FOCUS_RING}`}
+                      className={`mt-3 inline-flex items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#1C1C1C] ${FOCUS_RING}`}
                     >
                       <span>Open WhatsApp directly</span>
                       <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -887,7 +930,7 @@ function Contact() {
                 <button
                   type="submit"
                   disabled={phase === 'sending'}
-                  className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#4B5320] px-6 py-3.5 text-sm font-semibold tracking-wide text-white shadow-lg shadow-[#4B5320]/25 transition-all hover:-translate-y-0.5 hover:bg-[#3A4018] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-black px-6 py-3.5 text-sm font-semibold tracking-wide text-white shadow-lg shadow-black/25 transition-all hover:-translate-y-0.5 hover:bg-[#1C1C1C] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
                   <span>{buttonLabel}</span>
@@ -897,7 +940,7 @@ function Contact() {
           </Reveal>
 
           <Reveal direction="right" delay={0.15} className="lg:col-span-5">
-            <div className="flex h-full flex-col justify-center gap-6 rounded-3xl bg-[#4B5320] p-6 text-white sm:p-10">
+            <div className="flex h-full flex-col justify-center gap-6 rounded-3xl bg-black p-6 text-white sm:p-10">
               <h3
                 className="text-2xl font-extrabold uppercase tracking-wide"
                 style={{ fontFamily: DISPLAY_FONT }}
@@ -948,10 +991,7 @@ function Contact() {
 
 function Footer({ onNavigate }: { onNavigate: (id: string) => void }) {
   return (
-    <footer
-      className="border-t-4 py-10 text-white"
-      style={{ backgroundColor: GREEN_DARK, borderColor: KHAKI }}
-    >
+    <footer className="border-t-4 py-10 text-white" style={{ backgroundColor: INK, borderColor: ARMY }}>
       <div
         className={`${SHARED_CONTAINER} flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left`}
       >
@@ -965,7 +1005,7 @@ function Footer({ onNavigate }: { onNavigate: (id: string) => void }) {
             decoding="async"
             className="h-8 w-8 rounded-lg bg-white object-cover"
           />
-          <span className="text-base font-extrabold tracking-wide" style={{ fontFamily: DISPLAY_FONT }}>
+          <span className="text-xl tracking-wide" style={{ fontFamily: WORDMARK_FONT, fontWeight: 700 }}>
             HUSORO
           </span>
         </div>
@@ -1007,15 +1047,25 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<string>('home');
 
   useEffect(() => {
-    // Load display and body fonts once
-    const id = 'husoro-fonts';
-    if (document.getElementById(id)) return;
-    const link = document.createElement('link');
-    link.id = id;
-    link.rel = 'stylesheet';
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap';
-    document.head.appendChild(link);
+    // Global styles: Bank Gothic font-face and reduced-motion handling
+    const styleId = 'husoro-global-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = GLOBAL_CSS;
+      document.head.appendChild(style);
+    }
+
+    // Display, body, and fallback wordmark fonts from Google Fonts
+    const fontId = 'husoro-fonts';
+    if (!document.getElementById(fontId)) {
+      const link = document.createElement('link');
+      link.id = fontId;
+      link.rel = 'stylesheet';
+      link.href =
+        'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Oxanium:wght@600;700;800&display=swap';
+      document.head.appendChild(link);
+    }
   }, []);
 
   useEffect(() => {
@@ -1051,6 +1101,8 @@ export default function App() {
       className="min-h-screen overflow-x-hidden bg-white antialiased text-slate-900"
       style={{ fontFamily: BODY_FONT }}
     >
+      <ScrollProgress />
+
       <Header
         scrolled={scrolled}
         activeSection={activeSection}
